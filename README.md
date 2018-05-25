@@ -1,2 +1,2 @@
 # poa-netstats-warehouse
-Storage and processing companion for the poa-netstats-agent
+Storage and data-processing companion for the [poa-netstats-agent](https://github.com/poanetwork/poa-netstats-agent)
