@@ -7,7 +7,8 @@ defmodule PoaBackend.MixProject do
       version: "0.1.0",
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      test_coverage: [tool: ExCoveralls]
     ]
   end
 
@@ -24,7 +25,8 @@ defmodule PoaBackend.MixProject do
     [
       # Tests
       {:credo, "~> 0.9", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 0.5", only: [:dev], runtime: false}
+      {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
+      {:excoveralls, "~> 0.8", only: [:test, :dev], runtime: false}
     ]
   end
 end
