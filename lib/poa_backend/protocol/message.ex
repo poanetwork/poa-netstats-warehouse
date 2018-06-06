@@ -35,13 +35,13 @@ defmodule POABackend.Protocol.Message do
   That keeps all the message data and metadata
   """
   @type t :: %__MODULE__{
-    agent_id: String.t(),
+    agent_id: String.t() | nil,
     receivers: [atom()],
-    data_type: POABackend.CustomProtocol.DataType.t(),
-    message_type: POABackend.CustomProtocol.MessageType.t(),
+    data_type: POABackend.CustomProtocol.DataType.t() | nil,
+    message_type: POABackend.CustomProtocol.MessageType.t() | nil,
     assigns: %{atom() => any()},
-    peer: {:inet.ip_address(), :inet.port_number()},
-    data: Map.t()
+    peer: {:inet.ip_address(), :inet.port_number()} | nil,
+    data: Map.t() | nil
   }
 
   @doc """
