@@ -19,7 +19,7 @@ defmodule POABackend.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger],
+      extra_applications: [:logger, :cowboy, :plug, :poison],
       mod: {POABackend.Application, []}
     ]
   end
@@ -27,10 +27,15 @@ defmodule POABackend.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:cowboy, "~> 1.0.0"},
+      {:plug, "~> 1.0"},
+      {:poison, "~> 3.1"},
+
       # Tests
       {:credo, "~> 0.9", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
       {:excoveralls, "~> 0.8", only: [:test, :dev], runtime: false},
+      {:httpoison, "~> 1.0", only: [:test], runtime: true},
 
       # Docs
       {:ex_doc, "~> 0.18", only: :dev, runtime: false}
@@ -50,7 +55,8 @@ defmodule POABackend.MixProject do
           POABackend.Protocol.DataType
         ],
         "Custom Handler": [
-          POABackend.CustomHandler
+          POABackend.CustomHandler,
+          POABackend.CustomHandler.REST
         ]
       ]
     ]
