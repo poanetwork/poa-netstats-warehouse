@@ -37,6 +37,7 @@ defmodule CustomHandlerTest do
   test "initialize a custom handler in the supervisor" do
 
     Application.stop(:poa_backend)
+    original_env = Application.get_env(:poa_backend, :custom_handlers)
     Application.put_env(:poa_backend, :custom_handlers, [{:my_ch, MyCustomHandler, [caller_pid: self()]}])
     Application.ensure_all_started(:poa_backend)
 
@@ -49,5 +50,7 @@ defmodule CustomHandlerTest do
     assert_receive :world, 20_000
 
     Application.stop(:poa_backend)
+    Application.put_env(:poa_backend, :custom_handlers, original_env)
+    Application.ensure_all_started(:poa_backend)
   end
 end
