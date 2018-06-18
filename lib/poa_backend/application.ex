@@ -7,7 +7,9 @@ defmodule POABackend.Application do
     import Supervisor.Spec
 
     children = [
-      supervisor(POABackend.CustomHandler.Supervisor, [])
+      supervisor(POABackend.CustomHandler.Supervisor, []),
+      supervisor(POABackend.Metrics.Supervisor, []),
+      supervisor(POABackend.Receivers.Supervisor, [])
     ]
 
     opts = [strategy: :one_for_one, name: POABackend.Supervisor]

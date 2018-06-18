@@ -1,0 +1,8 @@
+{
+  "skip_files": [
+    "lib/poa_backend/receiver.ex",
+    "lib/poa_backend/protocol.ex",
+    "lib/poa_backend/protocol/data_type.ex",
+    "lib/poa_backend/protocol/message_type.ex"
+  ]
+}
