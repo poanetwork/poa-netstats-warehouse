@@ -30,6 +30,7 @@ defmodule POABackend.MixProject do
       {:cowboy, "~> 1.0.0"},
       {:plug, "~> 1.0"},
       {:poison, "~> 3.1"},
+      {:gen_stage, "~> 0.14"},
 
       # Tests
       {:credo, "~> 0.9", only: [:dev, :test], runtime: false},
@@ -57,6 +58,9 @@ defmodule POABackend.MixProject do
         "Custom Handler": [
           POABackend.CustomHandler,
           POABackend.CustomHandler.REST
+        ],
+        "Receivers": [
+          POABackend.Receiver
         ]
       ]
     ]
