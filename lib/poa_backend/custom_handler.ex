@@ -58,10 +58,7 @@ defmodule POABackend.CustomHandler do
   The mapping between Data Types and Receivers is done in the config file.
   """
   @spec send_to_receivers(Message.t) :: :ok
-  def send_to_receivers(%Message{} = _message) do
-    require Logger
-    # this will be implemented when working with the receivers
-    Logger.warn("To be implemented")
-    :ok
+  def send_to_receivers(%Message{} = message) do
+    POABackend.Metric.add(message.data_type, message)
   end
 end

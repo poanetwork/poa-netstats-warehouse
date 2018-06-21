@@ -11,4 +11,17 @@ defmodule POABackend.Protocol.DataType do
   """
   @type t :: :ethereum_metric
 
+  @doc false
+  def valid?(type) when is_binary(type) do
+    type
+    |> String.to_existing_atom()
+    |> valid?()
+  end
+
+  def valid?(type) when is_atom(type) do
+    valid_types = Application.get_env(:poa_backend, :metrics)
+
+    Enum.member?(valid_types, type)
+  end
+
 end

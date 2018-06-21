@@ -19,7 +19,7 @@ defmodule POABackend.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger, :cowboy, :plug, :poison],
+      extra_applications: [:logger, :cowboy, :plug, :poison, :worker_pool],
       mod: {POABackend.Application, []}
     ]
   end
@@ -31,12 +31,16 @@ defmodule POABackend.MixProject do
       {:plug, "~> 1.0"},
       {:poison, "~> 3.1"},
       {:gen_stage, "~> 0.14"},
+      {:worker_pool, "~> 3.1"},
+      {:ex_aws_dynamo, "~> 2.0"},
+      {:hackney, "~> 1.12"},
 
       # Tests
       {:credo, "~> 0.9", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
       {:excoveralls, "~> 0.8", only: [:test, :dev], runtime: false},
       {:httpoison, "~> 1.0", only: [:test], runtime: true},
+      {:mock, "~> 0.3", only: [:test], runtime: false},
 
       # Docs
       {:ex_doc, "~> 0.18", only: :dev, runtime: false}
@@ -60,7 +64,8 @@ defmodule POABackend.MixProject do
           POABackend.CustomHandler.REST
         ],
         "Receivers": [
-          POABackend.Receiver
+          POABackend.Receiver,
+          POABackend.Receivers.DynamoDB
         ]
       ]
     ]

@@ -287,6 +287,8 @@ defmodule POABackend.CustomHandler.REST do
     @moduledoc false
 
     alias POABackend.CustomHandler.REST
+    alias POABackend.Protocol.DataType
+    alias POABackend.Protocol.Message
 
     plug REST.AcceptPlug, "application/json"
     plug Plug.Parsers, parsers: [:json], json_decoder: Poison
@@ -330,8 +332,17 @@ defmodule POABackend.CustomHandler.REST do
       conn = REST.RequiredFieldsPlug.call(conn, ~w(type data))
 
       with false <- conn.halted,
-           true <- is_map(conn.params["data"])
+           true <- is_map(conn.params["data"]),
+           true <- DataType.valid?(conn.params["type"])
       do
+
+        type = String.to_existing_atom(conn.params["type"])
+
+        # sending the data to the receivers
+        conn.params["id"]
+        |> Message.new(type, :data, conn.params["data"])
+        |> POABackend.CustomHandler.send_to_receivers()
+
         conn
           |> put_resp_content_type("application/json")
           |> send_success_resp()
