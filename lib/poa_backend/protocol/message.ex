@@ -1,5 +1,7 @@
 defmodule POABackend.Protocol.Message do
   alias __MODULE__
+  alias POABackend.CustomProtocol.DataType
+  alias POABackend.CustomProtocol.MessageType
   
   @moduledoc """
   The message received from the Agent (inspired in [`Plug.Conn`](https://hexdocs.pm/plug/Plug.Conn.html)).
@@ -10,22 +12,18 @@ defmodule POABackend.Protocol.Message do
   ## Message Fields
 
     * `agent_id` - The Agent Id which sent the message to the backend.
-    * `receivers` - The list of the receivers which are going to receive this message. This list is retrieved from the config file and is mapped to the `data_type`
     * `data_type` - The kind of data the message is carring. For now only `ethereum_metric` type is defined.
     * `message_type` - This is the message type according to the custom protocol. Only `hello`, `data` and `latency` are defined
     * `assigns` - Shared user data as a map
-    * `peer` - The actual TCP peer that connected, example: `{{127, 0, 0, 1}, 12345}`.
     * `data` - The message payloda. It is a map
 
   """
 
   defstruct [
     agent_id: nil,
-    receivers: [],
     data_type: nil,
     message_type: nil,
     assigns: %{},
-    peer: nil,
     data: nil
   ]
 
@@ -36,11 +34,9 @@ defmodule POABackend.Protocol.Message do
   """
   @type t :: %__MODULE__{
     agent_id: String.t() | nil,
-    receivers: [atom()],
-    data_type: POABackend.CustomProtocol.DataType.t() | nil,
-    message_type: POABackend.CustomProtocol.MessageType.t() | nil,
+    data_type: DataType.t() | nil,
+    message_type: MessageType.t() | nil,
     assigns: %{atom() => any()},
-    peer: {:inet.ip_address(), :inet.port_number()} | nil,
     data: Map.t() | nil
   }
 
@@ -50,6 +46,20 @@ defmodule POABackend.Protocol.Message do
   @spec new() :: t
   def new() do
     %Message{}
+  end
+
+  @doc """
+  Returns a new Message Struct initialized.
+  The params in order are: agent_id, data_type, message_type and data
+  """
+  @spec new(String.t, DataType.t, MessageType.t, Map.t) :: t
+  def new(agent_id, data_type, message_type, data) do
+    %Message{
+      agent_id: agent_id,
+      data_type: data_type,
+      message_type: message_type,
+      data: data
+    }
   end
 
   @doc """
