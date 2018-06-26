@@ -61,6 +61,7 @@ defmodule POABackend.Receiver do
 
   - `init_receiver/1`: Called only once when the process starts
   - `metrics_received/3`: This function is called eveytime the Producer (metric type) receives a message.
+  - `handle_message/1`: This is called when the Receiver process receives an Erlang message
   - `terminate/1`: Called just before stopping the process
 
   This is a simple example of custom Receiver Plugin
@@ -103,6 +104,13 @@ defmodule POABackend.Receiver do
   @callback metrics_received(metrics :: [term()], from :: pid(), state :: any()) :: {:ok, state :: any()}
 
   @doc """
+    In this callback is called when the Receiver process receives an erlang message.
+
+    It must return `{:ok, state}`.
+  """
+  @callback handle_message(msg :: any(), state :: any()) :: {:ok, state :: any()}
+
+  @doc """
     This callback is called just before the Process goes down. This is a good place for closing connections.
   """
   @callback terminate(state :: term()) :: term()
@@ -113,16 +121,19 @@ defmodule POABackend.Receiver do
 
       @behaviour POABackend.Receiver
 
+      @doc false
       def start_link(%{name: name} = state) do
         GenStage.start_link(__MODULE__, state, name: name)
       end
 
+      @doc false
       def init(state) do
         {:ok, internal_state} = init_receiver(state.args)
 
         {:consumer, Map.put(state, :internal_state, internal_state), subscribe_to: state.subscribe_to}
       end
 
+      @doc false
       def handle_events(events, from, state) do
 
         {:ok, internal_state} = metrics_received(events, from, state.internal_state)
@@ -130,6 +141,13 @@ defmodule POABackend.Receiver do
         {:noreply, [], %{state | internal_state: internal_state}}
       end
 
+      @doc false
+      def handle_info(msg, state) do
+        {:ok, internal_state} = handle_message(msg, state.internal_state)
+        {:noreply, [], %{state | internal_state: internal_state}}
+      end
+
+      @doc false
       def terminate(_reason, state) do
         terminate(state)
       end

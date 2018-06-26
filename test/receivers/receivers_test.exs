@@ -13,6 +13,10 @@ defmodule Receivers.ReceiversTest do
         {:ok, state}
       end
 
+      def handle_message(_message, state) do
+        {:ok, state}
+      end
+
       def terminate(_state) do
         :ok
       end
@@ -36,6 +40,10 @@ defmodule Receivers.ReceiversTest do
           send(state[:test_pid], {:metric_received, metric})
         end
 
+        {:ok, state}
+      end
+
+      def handle_message(_message, state) do
         {:ok, state}
       end
 
