@@ -41,6 +41,7 @@ defmodule POABackend.MixProject do
       {:excoveralls, "~> 0.8", only: [:test, :dev], runtime: false},
       {:httpoison, "~> 1.0", only: [:test], runtime: true},
       {:mock, "~> 0.3", only: [:test], runtime: false},
+      {:websockex, "~> 0.4", only: [:test]},
 
       # Docs
       {:ex_doc, "~> 0.18", only: :dev, runtime: false}

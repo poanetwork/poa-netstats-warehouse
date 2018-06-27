@@ -78,6 +78,8 @@ defmodule POABackend.Receivers.DynamoDB do
     {:ok, state}
   end
 
+  def handle_message(_message, state), do: {:ok, state}
+
   def terminate(_) do
     :ok
   end

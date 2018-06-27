@@ -14,7 +14,12 @@ config :poa_backend,
 config :poa_backend,
        :receivers,
        [
-         # {:dashboard_receiver, POABackend.Receivers.Dashboard, [args: "myargs"]}
+         {:dashboard_receiver, POABackend.Receivers.Dashboard, [
+            scheme: :http,
+            ws_url: "/ws",
+            port: 8181,
+            ws_secret: "mywssecret"
+            ]}
        ]
 
 # here we define the type of metrics we accept. We will create a GenStage Producer per each type
@@ -29,5 +34,5 @@ config :poa_backend,
 config :poa_backend,
        :subscriptions,
        [
-         # {:dashboard_receiver, [:ethereum_metrics]}
+         {:dashboard_receiver, [:ethereum_metrics]}
        ]
