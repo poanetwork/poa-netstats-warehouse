@@ -52,7 +52,7 @@ defmodule POABackend.Receiver do
       config :poa_backend,
              :subscriptions,
              [
-               # {:my_receiver, [:ethereum_metrics]}
+               {:my_receiver, [:ethereum_metrics]}
              ]
 
   ## Implementing A Receiver Plugin
@@ -77,6 +77,10 @@ defmodule POABackend.Receiver do
           for metric <- metrics do
             IO.puts "metric received"
           end
+          {:ok, state}
+        end
+
+        def handle_message(_message, state) do
           {:ok, state}
         end
 

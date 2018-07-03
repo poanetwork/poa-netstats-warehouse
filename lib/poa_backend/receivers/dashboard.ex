@@ -29,6 +29,8 @@ defmodule POABackend.Receivers.Dashboard do
 
     @moduledoc false
 
+    require Logger
+
     alias POABackend.Protocol.Message
 
     @behaviour :cowboy_websocket_handler
@@ -40,9 +42,13 @@ defmodule POABackend.Receivers.Dashboard do
     def websocket_init(_type, req, %{receiver_id: receiver_id, ws_secret: ws_secret}) do
       case :cowboy_req.parse_header("wssecret", req) do
         {_, ^ws_secret, req} ->
+          Logger.info("Websocket connection with dashboard client accepted")
+
           send(receiver_id, {:add_client, self()})
-          {:ok, req, %{}}
+          {:ok, req, %{receiver_id: receiver_id}}
         {_, _, req} ->
+          Logger.info("Websocket connection with dashboard client unauthorized")
+
           {:shutdown, req}
       end
     end
@@ -55,7 +61,10 @@ defmodule POABackend.Receivers.Dashboard do
       {:reply, {:text, build_message(message)}, req, state}
     end
 
-    def websocket_terminate(_reason, _req, _state) do
+    def websocket_terminate(_reason, _req, %{receiver_id: receiver_id}) do
+      Logger.warn("Websocket connection with dashboard client lost")
+
+      send(receiver_id, {:remove_client, self()})
       :ok
     end
 
@@ -96,6 +105,10 @@ defmodule POABackend.Receivers.Dashboard do
 
   def handle_message({:add_client, client}, %{clients: clients} = state) do
     {:ok, %{state | clients: [client | clients]}}
+  end
+
+  def handle_message({:remove_client, client}, %{clients: clients} = state) do
+    {:ok, %{state | clients: List.delete(clients, client)}}
   end
 
   def terminate(_) do

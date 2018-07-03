@@ -66,7 +66,8 @@ defmodule POABackend.MixProject do
         ],
         "Receivers": [
           POABackend.Receiver,
-          POABackend.Receivers.DynamoDB
+          POABackend.Receivers.DynamoDB,
+          POABackend.Receivers.Dashboard
         ]
       ]
     ]
