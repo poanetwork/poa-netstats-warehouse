@@ -13,7 +13,7 @@ defmodule POABackend.Protocol.Message do
 
     * `agent_id` - The Agent Id which sent the message to the backend.
     * `data_type` - The kind of data the message is carring. For now only `ethereum_metric` type is defined.
-    * `message_type` - This is the message type according to the custom protocol. Only `hello`, `data` and `latency` are defined
+    * `message_type` - This is the message type according to the custom protocol. Only `data` and `bye` are defined for now
     * `assigns` - Shared user data as a map
     * `data` - The message payloda. It is a map
 

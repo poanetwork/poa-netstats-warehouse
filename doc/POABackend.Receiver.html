@@ -1,0 +1,445 @@
+    <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.18.3">
+    <title>POABackend.Receiver – poa_backend v0.1.0</title>
+    <link rel="stylesheet" href="dist/app-480ffdc169.css" />
+    
+    <script src="dist/sidebar_items-ffeb4f1e51.js"></script>
+    
+    
+    
+    
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode')) document.body.className += ' night-mode'; } catch (e) { }</script>
+
+    <div class="main">
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Sidebar</span>
+</button>
+<button class="sidebar-button night-mode-toggle">
+  <span class="icon-theme" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Theme</span>
+</button>
+<section class="sidebar">
+
+  
+  <a href="api-reference.html" class="sidebar-projectLink">
+    <div class="sidebar-projectDetails">
+      <h1 class="sidebar-projectName">
+        poa_backend
+      </h1>
+      <h2 class="sidebar-projectVersion">
+        v0.1.0
+      </h2>
+    </div>
+    
+  </a>
+
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <input name="q" type="text" id="search-list" class="search-input" placeholder="Search" aria-label="Search" autocomplete="off" />
+  </form>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+    
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+    
+
+    
+
+    
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+
+      <h1>
+        <small class="visible-xs">poa_backend v0.1.0</small>
+        POABackend.Receiver <small>behaviour</small>
+        
+          <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receiver.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+        
+      </h1>
+
+      
+        <section id="moduledoc">
+          <p>Defines a Receiver Plugin.</p>
+<p>A Receiver plugin will run in an independent process and will run the <code class="inline">metrics_received/3</code>
+function every time it receives a metric from the agents.</p>
+<p><a href="POABackend.html"><code class="inline">POABackend</code></a> app reads the Receivers configuration from the <code class="inline">config.exs</code> file when bootstrap and will create a
+process per each one of them. That configuration is referenced by :receivers key.</p>
+<pre><code class="elixir">config :poa_backend,
+   :receivers,
+   [
+     {name, module, args}
+   ]</code></pre>
+<p>for example</p>
+<pre><code class="elixir">config :poa_backend,
+   :receivers,
+   [
+     {:my_receiver, POABackend.Receivers.MyReceiver, [host: &quot;localhost&quot;, port: 1234]}
+   ]</code></pre>
+<p><code class="inline">name</code>, <code class="inline">module</code> and <code class="inline">args</code> must be defined in the configuration file.</p>
+<ul>
+<li><code class="inline">name</code>: Name for the new created process. Must be unique
+</li>
+<li><code class="inline">module</code>: Module which implements the Receiver behaviour
+</li>
+<li><code class="inline">args</code>: Initial args which will be passed to the <code class="inline">init_receiver/1</code> function
+</li>
+</ul>
+<p>The Receiver’s mechanism is built on top of <a href="https://hexdocs.pm/gen_stage/GenStage.html">GenStage</a>. Receivers are Consumers (sinks) and they must
+be subscribed to one or more Producers. The Producers are the Metric types (i.e. <code class="inline">ethereum_metrics</code>) and are defined in the config file too:</p>
+<pre><code class="elixir">config :poa_backend,
+       :metrics,
+       [
+         :ethereum_metrics
+       ]</code></pre>
+<p>In order to work properly we have to define in the configuration file the relation between the Receiver
+and the Metric types it wants to receive. </p>
+<pre><code class="elixir">config :poa_backend,
+     :subscriptions,
+     [
+       {receiver_name, [metric_type1, metric_type2]}
+     ]</code></pre>
+<p>for example</p>
+<pre><code class="elixir">config :poa_backend,
+       :subscriptions,
+       [
+         {:my_receiver, [:ethereum_metrics]}
+       ]</code></pre>
+<h2 id="module-implementing-a-receiver-plugin" class="section-heading">
+  <a href="#module-implementing-a-receiver-plugin" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Implementing A Receiver Plugin
+</h2>
+
+<p>In order to implement your Receiver Plugin you must implement 3 functions.</p>
+<ul>
+<li><code class="inline">init_receiver/1</code>: Called only once when the process starts
+</li>
+<li><code class="inline">metrics_received/3</code>: This function is called eveytime the Producer (metric type) receives a message.
+</li>
+<li><code class="inline">handle_message/1</code>: This is called when the Receiver process receives an Erlang message
+</li>
+<li><code class="inline">handle_inactive/2</code>: This function is called when one client has been disconnected or is not active for a period of time.
+</li>
+<li><code class="inline">terminate/1</code>: Called just before stopping the process
+</li>
+</ul>
+<p>This is a simple example of custom Receiver Plugin</p>
+<pre><code class="elixir">defmodule POABackend.Receivers.MyReceiver do
+  use POABackend.Receiver
+
+  def init_receiver(_args) do
+    {:ok, :no_state}
+  end
+
+  def metrics_received(metrics, from, state) do
+    for metric &lt;- metrics do
+      IO.puts &quot;metric received&quot;
+    end
+    {:ok, state}
+  end
+
+  def handle_message(_message, state) do
+    {:ok, state}
+  end
+
+  def handle_inactive(agent_id, state) do
+    {:ok, state}
+  end
+
+  def terminate(_state) do
+    :ok
+  end
+
+end</code></pre>
+
+        </section>
+      
+
+      
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+          
+
+          
+
+          
+  <div class="summary-callbacks summary">
+    <h2>
+      <a href="#callbacks">Callbacks</a>
+    </h2>
+    <div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:handle_inactive/2">handle_inactive(agent_id, state)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>This function is called when a Custom Handler detects a client is inactive</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:handle_message/2">handle_message(msg, state)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>In this callback is called when the Receiver process receives an erlang message</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:init_receiver/1">init_receiver(args)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>A callback executed when the Receiver Plugin starts.
+  The argument is retrieved from the configuration file when the Receiver is defined
+  It must return <code class="inline">{:ok, state}</code>, that <code class="inline">state</code> will be keept as in <a href="https://hexdocs.pm/elixir/GenServer.html"><code class="inline">GenServer</code></a> and can be
+  retrieved in the <code class="inline">metrics_received/3</code> function</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:metrics_received/3">metrics_received(metrics, from, state)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>This callback will be called every time a message to the subscribed metric type arrives. It must
+  return the tuple <code class="inline">{:ok, state}</code></p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:terminate/1">terminate(state)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>This callback is called just before the Process goes down. This is a good place for closing connections</p>
+</div>
+  
+</div>
+
+  </div>
+
+
+        </section>
+      
+
+      
+
+      
+
+      
+        <section id="callbacks" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#callbacks">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Callbacks
+          </h1>
+          <div class="detail" id="c:handle_inactive/2">
+  
+  
+  <div class="detail-header">
+    <a href="#c:handle_inactive/2" class="detail-link" title="Link to this callback">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this callback</span>
+    </a>
+    <span class="signature">handle_inactive(agent_id, state)</span>
+    
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receiver.ex#L129" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>handle_inactive(agent_id :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">binary</a>(), state :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()) :: {:ok, state :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>  This function is called when a Custom Handler detects a client is inactive.</p>
+<p>  The Custom Handler must to call explicity to <a href="POABackend.CustomHandler.html#publish_inactive/1"><code class="inline">POABackend.CustomHandler.publish_inactive/1</code></a> and it will publish the
+  <code class="inline">inactive</code> message to all the metrics in the system (defined in the config file).</p>
+
+  </section>
+</div>
+<div class="detail" id="c:handle_message/2">
+  
+  
+  <div class="detail-header">
+    <a href="#c:handle_message/2" class="detail-link" title="Link to this callback">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this callback</span>
+    </a>
+    <span class="signature">handle_message(msg, state)</span>
+    
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receiver.ex#L120" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>handle_message(msg :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>(), state :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()) :: {:ok, state :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>  In this callback is called when the Receiver process receives an erlang message.</p>
+<p>  It must return <code class="inline">{:ok, state}</code>.</p>
+
+  </section>
+</div>
+<div class="detail" id="c:init_receiver/1">
+  
+  
+  <div class="detail-header">
+    <a href="#c:init_receiver/1" class="detail-link" title="Link to this callback">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this callback</span>
+    </a>
+    <span class="signature">init_receiver(args)</span>
+    
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receiver.ex#L106" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>init_receiver(args :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()) :: {:ok, state :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>  A callback executed when the Receiver Plugin starts.
+  The argument is retrieved from the configuration file when the Receiver is defined
+  It must return <code class="inline">{:ok, state}</code>, that <code class="inline">state</code> will be keept as in <a href="https://hexdocs.pm/elixir/GenServer.html"><code class="inline">GenServer</code></a> and can be
+  retrieved in the <code class="inline">metrics_received/3</code> function.</p>
+
+  </section>
+</div>
+<div class="detail" id="c:metrics_received/3">
+  
+  
+  <div class="detail-header">
+    <a href="#c:metrics_received/3" class="detail-link" title="Link to this callback">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this callback</span>
+    </a>
+    <span class="signature">metrics_received(metrics, from, state)</span>
+    
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receiver.ex#L113" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>metrics_received(metrics :: [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()], from :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>(), state :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()) ::
+  {:ok, state :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>  This callback will be called every time a message to the subscribed metric type arrives. It must
+  return the tuple <code class="inline">{:ok, state}</code></p>
+
+  </section>
+</div>
+<div class="detail" id="c:terminate/1">
+  
+  
+  <div class="detail-header">
+    <a href="#c:terminate/1" class="detail-link" title="Link to this callback">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this callback</span>
+    </a>
+    <span class="signature">terminate(state)</span>
+    
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receiver.ex#L134" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>terminate(state :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>  This callback is called just before the Process goes down. This is a good place for closing connections.</p>
+
+  </section>
+</div>
+
+        </section>
+      
+          <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" rel="help" target="_blank">ExDoc</a> (v0.18.3),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+            </span>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  <script src="dist/app-9bd040e5e5.js"></script>
+  
+  
+  
+  
+  </body>
+</html>
+

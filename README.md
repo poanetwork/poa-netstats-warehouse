@@ -7,7 +7,10 @@ Storage and data-processing companion for the [poa-netstats-agent](https://githu
 
 ## Documentation
 
-In order to build the documentation run
+- [Initial Architecture](pages/initial_architecture.md)
+- You can find the online documentation [here](https://rawgit.com/poanetwork/poa-netstats-warehouse/master/doc/index.html)
+
+Or you can build the documenation locally running
 
 ```
 mix deps.get

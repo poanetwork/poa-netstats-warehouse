@@ -1,0 +1,396 @@
+    <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.18.3">
+    <title>POABackend.CustomHandler.REST – poa_backend v0.1.0</title>
+    <link rel="stylesheet" href="dist/app-480ffdc169.css" />
+    
+    <script src="dist/sidebar_items-ffeb4f1e51.js"></script>
+    
+    
+    
+    
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode')) document.body.className += ' night-mode'; } catch (e) { }</script>
+
+    <div class="main">
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Sidebar</span>
+</button>
+<button class="sidebar-button night-mode-toggle">
+  <span class="icon-theme" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Theme</span>
+</button>
+<section class="sidebar">
+
+  
+  <a href="api-reference.html" class="sidebar-projectLink">
+    <div class="sidebar-projectDetails">
+      <h1 class="sidebar-projectName">
+        poa_backend
+      </h1>
+      <h2 class="sidebar-projectVersion">
+        v0.1.0
+      </h2>
+    </div>
+    
+  </a>
+
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <input name="q" type="text" id="search-list" class="search-input" placeholder="Search" aria-label="Search" autocomplete="off" />
+  </form>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+    
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+    
+
+    
+
+    
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+
+      <h1>
+        <small class="visible-xs">poa_backend v0.1.0</small>
+        POABackend.CustomHandler.REST
+        
+          <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/custom_handler/rest.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+        
+      </h1>
+
+      
+        <section id="moduledoc">
+          <p>This module implements the REST Custom Handler over HTTP/1.1.</p>
+<h1>Plugin Architecture</h1>
+<p>This plugin involves many processes. When the <code class="inline">POABackend.CustomHandler.Supervisor</code> calls the
+<code class="inline">child_spec/2</code> function it will create its own supervision tree under that supervisor</p>
+<p><img src="./REST_architecture.png" alt="REST plugin Architecture"/></p>
+<ul>
+<li><code class="inline">POABackend.CustomHandler.REST.Supervisor</code> is the main supervisor. It is in charge of supervise its three
+children.
+</li>
+<li>The <code class="inline">Ranch/Cowboy</code> branch is managed by Ranch and Cowboy apps. They are in charge of expose the REST endpoints on top
+of http.
+</li>
+<li>The Registry is an Elixir Registry in charge of track/untrack Activity Monitor Servers, created by the next child
+</li>
+<li><code class="inline">POABackend.CustomHandler.REST.Monitor.Supervisor</code> is a Supervisor with <code class="inline">:simple_one_for_one</code> strategy. It will start
+dynamically <a href="https://hexdocs.pm/elixir/GenServer.html"><code class="inline">GenServer</code></a>’s implemented by <code class="inline">POABackend.CustomHandler.REST.Monitor.Server</code> module.
+</li>
+</ul>
+<h1>REST endpoints</h1>
+<p>This Pluting also defines the endpoints needed to use the POA Protocol.</p>
+<h2 id="module-ping-endpoint" class="section-heading">
+  <a href="#module-ping-endpoint" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  <em>ping</em> endpoint
+</h2>
+
+<pre><code class="elixir">POST /ping</code></pre>
+<p>request:</p>
+<pre><code class="elixir">Headers: {&quot;content-type&quot;, &quot;application/json&quot;}
+payload:
+  {
+    id: String() # agent id
+    secret: String() # secret string for authentication/authorisation
+  }</code></pre>
+<p>responses:</p>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left">Code</th><th style="text-align: left">Description</th>
+</tr>
+</thead>
+<tr>
+<td style="text-align: left">200</td><td style="text-align: left">Success <em>{“result”:”success”}</em></td>
+</tr>
+<tr>
+<td style="text-align: left">401</td><td style="text-align: left">Unauthorized</td>
+</tr>
+<tr>
+<td style="text-align: left">415</td><td style="text-align: left">Unsupported Media Type (only <em>application/json</em> allowed)</td>
+</tr>
+<tr>
+<td style="text-align: left">422</td><td style="text-align: left">Unprocessable Entity. Required fields missing</td>
+</tr>
+</table>
+<p>Example:</p>
+<pre><code class="elixir">curl -v -d &#39;{&quot;id&quot;:&quot;agentID&quot;, &quot;secret&quot;:&quot;mysecret&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:4002/ping
+
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* TCP_NODELAY set
+* Connected to localhost (127.0.0.1) port 4002 (#0)
+&gt; POST /ping HTTP/1.1
+&gt; Host: localhost:4002
+&gt; User-Agent: curl/7.53.1
+&gt; Accept: */*
+&gt; Content-Type: application/json
+&gt; Content-Length: 37
+&gt;
+* upload completely sent off: 37 out of 37 bytes
+&lt; HTTP/1.1 200 OK
+&lt; server: Cowboy
+&lt; date: Fri, 08 Jun 2018 13:27:58 GMT
+&lt; content-length: 20
+&lt; cache-control: max-age=0, private, must-revalidate
+&lt; content-type: application/json; charset=utf-8
+&lt;
+* Connection #0 to host localhost left intact
+{&quot;result&quot;:&quot;success&quot;}</code></pre>
+<h2 id="module-data-endpoint" class="section-heading">
+  <a href="#module-data-endpoint" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  <em>data</em> endpoint
+</h2>
+
+<pre><code class="elixir">POST /data</code></pre>
+<p>request:</p>
+<pre><code class="elixir">Headers: {&quot;content-type&quot;, &quot;application/json&quot;}
+payload:
+  {
+    id: String() # agent id
+    secret: String() # secret string for authentication/authorisation
+    type: String() # data type (for now only ethereum_metrics)
+    data: Object() # metric data itself
+  }</code></pre>
+<p>responses:</p>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left">Code</th><th style="text-align: left">Description</th>
+</tr>
+</thead>
+<tr>
+<td style="text-align: left">200</td><td style="text-align: left">Success <em>{“result”:”success”}</em></td>
+</tr>
+<tr>
+<td style="text-align: left">401</td><td style="text-align: left">Unauthorized</td>
+</tr>
+<tr>
+<td style="text-align: left">415</td><td style="text-align: left">Unsupported Media Type (only <em>application/json</em> allowed)</td>
+</tr>
+<tr>
+<td style="text-align: left">422</td><td style="text-align: left">Unprocessable Entity. Required fields missing</td>
+</tr>
+</table>
+<p>Example:</p>
+<pre><code class="elixir">curl -v -d &#39;{&quot;id&quot;:&quot;agentID&quot;, &quot;secret&quot;:&quot;mysecret&quot;, &quot;type&quot;:&quot;ethereum_metrics&quot;, &quot;data&quot;:{&quot;hello&quot;:&quot;world&quot;}}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:4002/data
+
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* TCP_NODELAY set
+* Connected to localhost (127.0.0.1) port 4002 (#0)
+&gt; POST /data HTTP/1.1
+&gt; Host: localhost:4002
+&gt; User-Agent: curl/7.53.1
+&gt; Accept: */*
+&gt; Content-Type: application/json
+&gt; Content-Length: 90
+&gt;
+* upload completely sent off: 90 out of 90 bytes
+&lt; HTTP/1.1 200 OK
+&lt; server: Cowboy
+&lt; date: Fri, 08 Jun 2018 16:02:22 GMT
+&lt; content-length: 20
+&lt; cache-control: max-age=0, private, must-revalidate
+&lt; content-type: application/json; charset=utf-8
+&lt;
+* Connection #0 to host localhost left intact
+{&quot;result&quot;:&quot;success&quot;}</code></pre>
+<h2 id="module-bye-endpoint" class="section-heading">
+  <a href="#module-bye-endpoint" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  <em>bye</em> endpoint
+</h2>
+
+<pre><code class="elixir">POST /bye</code></pre>
+<p>request:</p>
+<pre><code class="elixir">Headers: {&quot;content-type&quot;, &quot;application/json&quot;}
+payload:
+  {
+    id: String() # agent id
+    secret: String() # secret string for authentication/authorisation
+  }</code></pre>
+<p>responses:</p>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left">Code</th><th style="text-align: left">Description</th>
+</tr>
+</thead>
+<tr>
+<td style="text-align: left">200</td><td style="text-align: left">Success <em>{“result”:”success”}</em></td>
+</tr>
+<tr>
+<td style="text-align: left">401</td><td style="text-align: left">Unauthorized</td>
+</tr>
+<tr>
+<td style="text-align: left">415</td><td style="text-align: left">Unsupported Media Type (only <em>application/json</em> allowed)</td>
+</tr>
+<tr>
+<td style="text-align: left">422</td><td style="text-align: left">Unprocessable Entity. Required fields missing</td>
+</tr>
+</table>
+<p>Example:</p>
+<pre><code class="elixir">curl -v -d &#39;{&quot;id&quot;:&quot;agentID&quot;, &quot;secret&quot;:&quot;mysecret&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:4002/bye
+
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* TCP_NODELAY set
+* Connected to localhost (127.0.0.1) port 4002 (#0)
+&gt; POST /bye HTTP/1.1
+&gt; Host: localhost:4002
+&gt; User-Agent: curl/7.53.1
+&gt; Accept: */*
+&gt; Content-Type: application/json
+&gt; Content-Length: 37
+&gt;
+* upload completely sent off: 37 out of 37 bytes
+&lt; HTTP/1.1 200 OK
+&lt; server: Cowboy
+&lt; date: Fri, 08 Jun 2018 15:49:05 GMT
+&lt; content-length: 20
+&lt; cache-control: max-age=0, private, must-revalidate
+&lt; content-type: application/json; charset=utf-8
+&lt;
+* Connection #0 to host localhost left intact
+{&quot;result&quot;:&quot;success&quot;}
+</code></pre>
+
+        </section>
+      
+
+      
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+          
+
+          
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+    <div class="summary-row">
+  <div class="summary-signature">
+    <a href="#ping_monitor/1">ping_monitor(agent_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>This function will initialize an Activity Monitor Server for a given Agent ID if it doesn’t
+exist already. If it exist this function will send a ping message to the Monitor Server in order to
+restart the timeout countdown</p>
+</div>
+  
+</div>
+
+  </div>
+
+
+          
+
+        </section>
+      
+
+      
+
+      
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Functions
+          </h1>
+          <div class="detail" id="ping_monitor/1">
+  
+  
+  <div class="detail-header">
+    <a href="#ping_monitor/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <span class="signature">ping_monitor(agent_id)</span>
+    
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/custom_handler/rest.ex#L274" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+    
+    
+    
+  </div>
+  <section class="docstring">
+    <p>This function will initialize an Activity Monitor Server for a given Agent ID if it doesn’t
+exist already. If it exist this function will send a ping message to the Monitor Server in order to
+restart the timeout countdown.</p>
+<p>The Activity Monitor Server is a <a href="https://hexdocs.pm/elixir/GenServer.html"><code class="inline">GenServer</code></a> which will be initialized under the
+<code class="inline">POABackend.CustomHandler.REST.Monitor.Supervisor</code> supervisor.</p>
+
+  </section>
+</div>
+
+        </section>
+      
+
+      
+          <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" rel="help" target="_blank">ExDoc</a> (v0.18.3),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+            </span>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  <script src="dist/app-9bd040e5e5.js"></script>
+  
+  
+  
+  
+  </body>
+</html>
+
