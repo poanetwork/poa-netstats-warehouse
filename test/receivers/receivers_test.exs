@@ -17,6 +17,10 @@ defmodule Receivers.ReceiversTest do
         {:ok, state}
       end
 
+      def handle_inactive(_, state) do
+        {:ok, state}
+      end
+
       def terminate(_state) do
         :ok
       end
@@ -44,6 +48,10 @@ defmodule Receivers.ReceiversTest do
       end
 
       def handle_message(_message, state) do
+        {:ok, state}
+      end
+
+      def handle_inactive(_, state) do
         {:ok, state}
       end
 

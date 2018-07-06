@@ -1,5 +1,8 @@
 defmodule POABackend.CustomHandler do
+
   alias POABackend.Protocol.Message
+  alias POABackend.Metric
+
   @moduledoc """
   A Custom Handler is responsible of handling data sent from Agents (i.e. REST over HTTP, WebSockets...) "speaking" the POA Protocol.
 
@@ -38,6 +41,13 @@ defmodule POABackend.CustomHandler do
   is the id for that handler, the second one is the Elixir module which implements the CustomHandler behaviour and the third one is a list for arguments
   which will be passed to the `child_spec/1` function as a parameter
 
+  ### Helpful functions
+
+  This module also define some helpful functions:
+
+  - send_to_receivers/1: This function will publish the incomming message to the appropiate metric type (Data Type). A Custom Handler must call it when it wants to dispatch a message.
+  - publish_inactive/1: Will publish an inactive message to all the metrics in the system. A Custom Handler must call it when detects if a client is disconnected or/and inactive
+
   """
 
   @doc """
@@ -53,12 +63,23 @@ defmodule POABackend.CustomHandler do
   end
 
   @doc """
-  This function dispatches the given Message to the appropiate receivers based on the Data Type.
+  This function dispatches the given Message to the appropiate receivers based on the Data Type (ie :ethereum_metric).
 
   The mapping between Data Types and Receivers is done in the config file.
+
+  _Note_ the message must be a [POABackend.Protocol.Message](POABackend.Protocol.Message.html) struct
   """
   @spec send_to_receivers(Message.t) :: :ok
   def send_to_receivers(%Message{} = message) do
-    POABackend.Metric.add(message.data_type, message)
+    Metric.add(message.data_type, message)
+  end
+
+  @doc """
+  Publish an inactive message to all the metrics defined  in the config file.
+
+  A Custom Handler must call this explicity when detecting if a client is inactive for a period of time
+  """
+  def publish_inactive(agent_id) do
+    Metric.broadcast({:inactive, agent_id})
   end
 end

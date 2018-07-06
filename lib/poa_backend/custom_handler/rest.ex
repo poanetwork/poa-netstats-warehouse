@@ -4,7 +4,24 @@ defmodule POABackend.CustomHandler.REST do
   @moduledoc """
   This module implements the REST Custom Handler over HTTP/1.1.
 
-  It defines the endpoints needed to use the POA Protocol.
+  # Plugin Architecture
+
+  This plugin involves many processes. When the `POABackend.CustomHandler.Supervisor` calls the
+  `child_spec/2` function it will create its own supervision tree under that supervisor
+
+  ![REST plugin Architecture](./REST_architecture.png)
+
+  - `POABackend.CustomHandler.REST.Supervisor` is the main supervisor. It is in charge of supervise its three
+  children.
+  - The `Ranch/Cowboy` branch is managed by Ranch and Cowboy apps. They are in charge of expose the REST endpoints on top
+  of http.
+  - The Registry is an Elixir Registry in charge of track/untrack Activity Monitor Servers, created by the next child
+  - `POABackend.CustomHandler.REST.Monitor.Supervisor` is a Supervisor with `:simple_one_for_one` strategy. It will start
+  dynamically `GenServer`'s implemented by `POABackend.CustomHandler.REST.Monitor.Server` module.
+
+  # REST endpoints
+
+  This Pluting also defines the endpoints needed to use the POA Protocol.
 
   ## _hello_ endpoint
 
@@ -290,10 +307,10 @@ defmodule POABackend.CustomHandler.REST do
     alias POABackend.Protocol.DataType
     alias POABackend.Protocol.Message
 
-    plug REST.AcceptPlug, "application/json"
+    plug REST.Plugs.Accept, "application/json"
     plug Plug.Parsers, parsers: [:json], json_decoder: Poison
-    plug REST.RequiredFieldsPlug, ~w(id secret)
-    plug REST.AuthorizationPlug
+    plug REST.Plugs.RequiredFields, ~w(id secret)
+    plug REST.Plugs.Authorization
     plug :match
     plug :dispatch
 
@@ -304,13 +321,15 @@ defmodule POABackend.CustomHandler.REST do
     end
 
     post "/ping" do
+      :ok = REST.ping_monitor(conn.params["id"])
+
       conn
       |> put_resp_content_type("application/json")
       |> send_success_resp()
     end
 
     post "/latency" do
-      conn = REST.RequiredFieldsPlug.call(conn, ~w(latency))
+      conn = REST.Plugs.RequiredFields.call(conn, ~w(latency))
 
       with false <- conn.halted,
            true <- is_float(conn.params["latency"])
@@ -329,7 +348,7 @@ defmodule POABackend.CustomHandler.REST do
     end
 
     post "/data" do
-      conn = REST.RequiredFieldsPlug.call(conn, ~w(type data))
+      conn = REST.Plugs.RequiredFields.call(conn, ~w(type data))
 
       with false <- conn.halted,
            true <- is_map(conn.params["data"]),
@@ -379,10 +398,35 @@ defmodule POABackend.CustomHandler.REST do
     end
   end
 
+  @doc """
+  This function will initialize an Activity Monitor Server for a given Agent ID if it doesn't
+  exist already. If it exist this function will send a ping message to the Monitor Server in order to
+  restart the timeout countdown.
+
+  The Activity Monitor Server is a `GenServer` which will be initialized under the
+  `POABackend.CustomHandler.REST.Monitor.Supervisor` supervisor.
+  """
+  def ping_monitor(agent_id) when is_binary(agent_id) do
+    case Registry.lookup(:rest_activity_monitor_registry, agent_id) do
+      [{pid, _}] ->
+        GenServer.cast(pid, :ping)
+      [] ->
+        {:ok, _} = start_monitor(agent_id)
+    end
+
+    :ok
+  end
+
+  @doc false
+  def start_monitor(agent_id) when is_binary(agent_id) do
+    Supervisor.start_child(POABackend.CustomHandler.REST.Monitor.Supervisor, [agent_id])
+  end
+
   # Custom Handler Callbacks
 
+  @doc false
   def child_spec(options) do
-    Plug.Adapters.Cowboy.child_spec(scheme: options[:scheme], plug: POABackend.CustomHandler.REST.Router, options: [port: options[:port]])
+    POABackend.CustomHandler.REST.Supervisor.child_spec(options)
   end
 
 end

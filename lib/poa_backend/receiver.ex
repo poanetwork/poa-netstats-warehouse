@@ -62,6 +62,7 @@ defmodule POABackend.Receiver do
   - `init_receiver/1`: Called only once when the process starts
   - `metrics_received/3`: This function is called eveytime the Producer (metric type) receives a message.
   - `handle_message/1`: This is called when the Receiver process receives an Erlang message
+  - `handle_inactive/2`: This function is called when one client has been disconnected or is not active for a period of time.
   - `terminate/1`: Called just before stopping the process
 
   This is a simple example of custom Receiver Plugin
@@ -81,6 +82,10 @@ defmodule POABackend.Receiver do
         end
 
         def handle_message(_message, state) do
+          {:ok, state}
+        end
+
+        def handle_inactive(agent_id, state) do
           {:ok, state}
         end
 
@@ -114,6 +119,15 @@ defmodule POABackend.Receiver do
   """
   @callback handle_message(msg :: any(), state :: any()) :: {:ok, state :: any()}
 
+
+  @doc """
+    This function is called when a Custom Handler detects a client is inactive.
+
+    The Custom Handler must to call explicity to `POABackend.CustomHandler.publish_inactive/1` and it will publish the
+    `inactive` message to all the metrics in the system (defined in the config file).
+  """
+  @callback handle_inactive(agent_id :: binary(), state :: any()) :: {:ok, state :: any()}
+
   @doc """
     This callback is called just before the Process goes down. This is a good place for closing connections.
   """
@@ -138,6 +152,13 @@ defmodule POABackend.Receiver do
       end
 
       @doc false
+      def handle_events([inactive: agent_id], _from, state) do
+
+        {:ok, internal_state} = handle_inactive(agent_id, state.internal_state)
+
+        {:noreply, [], %{state | internal_state: internal_state}}
+      end
+
       def handle_events(events, from, state) do
 
         {:ok, internal_state} = metrics_received(events, from, state.internal_state)

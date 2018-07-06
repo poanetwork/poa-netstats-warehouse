@@ -8,6 +8,14 @@ defmodule POABackend.Metric do
     GenStage.start_link(__MODULE__, :ok, name: name)
   end
 
+  def broadcast(message) do
+    metrics = Application.get_env(:poa_backend, :metrics)
+
+    for metric <- metrics do
+      add(metric, message)
+    end
+  end
+
   def init(:ok) do
     {:producer, [], dispatcher: GenStage.BroadcastDispatcher}
   end

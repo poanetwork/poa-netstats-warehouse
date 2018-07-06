@@ -1,4 +1,4 @@
-defmodule POABackend.CustomHandler.REST.AuthorizationPlug do
+defmodule POABackend.CustomHandler.REST.Plugs.Authorization do
   @moduledoc false
 
   @behaviour Plug
