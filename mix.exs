@@ -79,5 +79,6 @@ defmodule POABackend.MixProject do
 
   defp picture(_) do
     File.cp("./assets/backend_architecture.png", "./doc/backend_architecture.png")
+    File.cp("./assets/REST_architecture.png", "./doc/REST_architecture.png")
   end
 end

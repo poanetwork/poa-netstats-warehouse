@@ -24,6 +24,7 @@ defmodule POABackend.Receivers.Dashboard do
   use POABackend.Receiver
 
   alias __MODULE__
+  alias POABackend.Protocol.Message
 
   defmodule SocketHandler do
 
@@ -111,6 +112,24 @@ defmodule POABackend.Receivers.Dashboard do
     {:ok, %{state | clients: List.delete(clients, client)}}
   end
 
+  def handle_inactive(agent_id, %{clients: clients} = state) do
+    data = %{"type" => "statistics",
+             "body" =>
+            %{"active" => false,
+              "gasPrice" => nil,
+              "hashrate" => 0,
+              "mining" => false,
+              "peers" => 0,
+              "syncing" => nil,
+              "uptime" => nil
+              }}
+
+    agent_id
+    |> Message.new(:ethereum_metrics, :data, data)
+    |> dispatch_metric(clients)
+    {:ok, state}
+  end
+
   def terminate(_) do
     :ok
   end
@@ -137,7 +156,7 @@ defmodule POABackend.Receivers.Dashboard do
     ]
   end
 
-  defp dispatch_metric(metrics, clients) do
+  defp dispatch_metric(metrics, clients) when is_list(metrics) do
     for client <- clients do
       for metric <- metrics do
         send(client, metric)
@@ -145,6 +164,10 @@ defmodule POABackend.Receivers.Dashboard do
     end
 
     :ok
+  end
+
+  defp dispatch_metric(metric, clients) do
+    dispatch_metric([metric], clients)
   end
 
 end

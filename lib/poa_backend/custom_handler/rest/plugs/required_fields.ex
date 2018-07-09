@@ -1,4 +1,4 @@
-defmodule POABackend.CustomHandler.REST.RequiredFieldsPlug do
+defmodule POABackend.CustomHandler.REST.Plugs.RequiredFields do
   @moduledoc false
 
   @behaviour Plug

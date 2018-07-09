@@ -1,4 +1,4 @@
-defmodule POABackend.CustomHandler.REST.AcceptPlug do
+defmodule POABackend.CustomHandler.REST.Plugs.Accept do
   @moduledoc false
 
   @behaviour Plug
