@@ -101,6 +101,7 @@ dynamically <a href="https://hexdocs.pm/elixir/GenServer.html"><code class="inli
 </ul>
 <h1>REST endpoints</h1>
 <p>This Pluting also defines the endpoints needed to use the POA Protocol.</p>
+<p><strong>All the endpoints accept pure JSON or <a href="https://msgpack.org/">MessagePack</a> formats</strong></p>
 <h2 id="module-ping-endpoint" class="section-heading">
   <a href="#module-ping-endpoint" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
   <em>ping</em> endpoint
@@ -108,12 +109,18 @@ dynamically <a href="https://hexdocs.pm/elixir/GenServer.html"><code class="inli
 
 <pre><code class="elixir">POST /ping</code></pre>
 <p>request:</p>
-<pre><code class="elixir">Headers: {&quot;content-type&quot;, &quot;application/json&quot;}
+<pre><code class="elixir">Headers: {&quot;content-type&quot;, &quot;application/json&quot; or &quot;application/msgpack&quot;}
 payload:
+  JSON:
+
   {
     id: String() # agent id
     secret: String() # secret string for authentication/authorisation
-  }</code></pre>
+  }
+
+  MessagePack:
+
+  Same format as JSON but packed thru MessagePack library</code></pre>
 <p>responses:</p>
 <table>
 <colgroup>
@@ -132,7 +139,7 @@ payload:
 <td style="text-align: left">401</td><td style="text-align: left">Unauthorized</td>
 </tr>
 <tr>
-<td style="text-align: left">415</td><td style="text-align: left">Unsupported Media Type (only <em>application/json</em> allowed)</td>
+<td style="text-align: left">415</td><td style="text-align: left">Unsupported Media Type (only <em>application/json</em> and <strong>application/msgpack</strong> allowed)</td>
 </tr>
 <tr>
 <td style="text-align: left">422</td><td style="text-align: left">Unprocessable Entity. Required fields missing</td>
@@ -169,14 +176,20 @@ Note: Unnecessary use of -X or --request, POST is already inferred.
 
 <pre><code class="elixir">POST /data</code></pre>
 <p>request:</p>
-<pre><code class="elixir">Headers: {&quot;content-type&quot;, &quot;application/json&quot;}
+<pre><code class="elixir">Headers: {&quot;content-type&quot;, &quot;application/json&quot; or &quot;application/msgpack&quot;}
 payload:
+  JSON:
+
   {
     id: String() # agent id
     secret: String() # secret string for authentication/authorisation
     type: String() # data type (for now only ethereum_metrics)
     data: Object() # metric data itself
-  }</code></pre>
+  }
+
+  MessagePack:
+
+  Same format as JSON but packed thru MessagePack library</code></pre>
 <p>responses:</p>
 <table>
 <colgroup>
@@ -195,7 +208,7 @@ payload:
 <td style="text-align: left">401</td><td style="text-align: left">Unauthorized</td>
 </tr>
 <tr>
-<td style="text-align: left">415</td><td style="text-align: left">Unsupported Media Type (only <em>application/json</em> allowed)</td>
+<td style="text-align: left">415</td><td style="text-align: left">Unsupported Media Type (only <em>application/json</em> and <strong>application/msgpack</strong> allowed)</td>
 </tr>
 <tr>
 <td style="text-align: left">422</td><td style="text-align: left">Unprocessable Entity. Required fields missing</td>
@@ -232,12 +245,18 @@ Note: Unnecessary use of -X or --request, POST is already inferred.
 
 <pre><code class="elixir">POST /bye</code></pre>
 <p>request:</p>
-<pre><code class="elixir">Headers: {&quot;content-type&quot;, &quot;application/json&quot;}
+<pre><code class="elixir">Headers: {&quot;content-type&quot;, &quot;application/json&quot; or &quot;application/msgpack&quot;}
 payload:
+  JSON:
+
   {
     id: String() # agent id
     secret: String() # secret string for authentication/authorisation
-  }</code></pre>
+  }
+
+  MessagePack:
+
+  Same format as JSON but packed thru MessagePack library</code></pre>
 <p>responses:</p>
 <table>
 <colgroup>
@@ -256,7 +275,7 @@ payload:
 <td style="text-align: left">401</td><td style="text-align: left">Unauthorized</td>
 </tr>
 <tr>
-<td style="text-align: left">415</td><td style="text-align: left">Unsupported Media Type (only <em>application/json</em> allowed)</td>
+<td style="text-align: left">415</td><td style="text-align: left">Unsupported Media Type (only <em>application/json</em> and <strong>application/msgpack</strong> allowed)</td>
 </tr>
 <tr>
 <td style="text-align: left">422</td><td style="text-align: left">Unprocessable Entity. Required fields missing</td>
@@ -348,7 +367,7 @@ restart the timeout countdown</p>
     </a>
     <span class="signature">ping_monitor(agent_id)</span>
     
-      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/custom_handler/rest.ex#L274" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/custom_handler/rest.ex#L294" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>

@@ -9,7 +9,11 @@ defmodule CustomHandler.RESTTest do
   # /ping Endpoint Tests
   # ----------------------------------------
 
-  test "testing the REST /ping endpoint" do
+  test "testing the REST /ping endpoint [JSON]" do
+    {200, %{"result" => "success"}} = ping("agentID")
+  end
+
+  test "testing the REST /ping endpoint [MSGPACK]" do
     {200, %{"result" => "success"}} = ping("agentID")
   end
 
@@ -79,7 +83,7 @@ defmodule CustomHandler.RESTTest do
 
     %{active: ^active_monitors} = Supervisor.count_children(Monitor.Supervisor)
 
-    {200, %{"result" => "success"}} = ping(agent_id)
+    {200, %{"result" => "success"}} = ping_msgpack(agent_id)
 
     %{active: ^active_monitors} = Supervisor.count_children(Monitor.Supervisor)
 
@@ -90,10 +94,18 @@ defmodule CustomHandler.RESTTest do
   # /data Endpoint Tests
   # ----------------------------------------
 
-  test "testing the REST /data endpoint" do
+  test "testing the REST /data endpoint [JSON]" do
     url = @base_url <> "/data"
     {:ok, data} = Poison.encode(%{id: "agentID", secret: "mysecret", type: "ethereum_metrics", data: %{hello: :world}})
     headers = [{"Content-Type", "application/json"}]
+
+    {200, %{"result" => "success"}} = post(url, data, headers)
+  end
+
+  test "testing the REST /data endpoint [MSGPACK]" do
+    url = @base_url <> "/data"
+    {:ok, data} = Msgpax.pack(%{id: "agentID", secret: "mysecret", type: "ethereum_metrics", data: %{hello: :world}})
+    headers = [{"Content-Type", "application/msgpack"}]
 
     {200, %{"result" => "success"}} = post(url, data, headers)
   end
@@ -141,10 +153,18 @@ defmodule CustomHandler.RESTTest do
   # /bye Endpoint Tests
   # ----------------------------------------
 
-  test "testing the REST /bye endpoint" do
+  test "testing the REST /bye endpoint [JSON]" do
     url = @base_url <> "/bye"
     {:ok, data} = Poison.encode(%{id: "agentID", secret: "mysecret", data: %{hello: "world"}})
     headers = [{"Content-Type", "application/json"}]
+
+    {200, %{"result" => "success"}} = post(url, data, headers)
+  end
+
+  test "testing the REST /bye endpoint [MSGPACK]" do
+    url = @base_url <> "/bye"
+    {:ok, data} = Msgpax.pack(%{id: "agentID", secret: "mysecret", data: %{hello: "world"}})
+    headers = [{"Content-Type", "application/msgpack"}]
 
     {200, %{"result" => "success"}} = post(url, data, headers)
   end
@@ -213,11 +233,27 @@ defmodule CustomHandler.RESTTest do
   end
 
   defp ping(agent_id) do
+    gen_ping(agent_id, "application/json")
+  end
+
+  defp ping_msgpack(agent_id) do
+    gen_ping(agent_id, "application/msgpack")
+  end
+
+  defp gen_ping(agent_id, mime_type) do
     url = @base_url <> "/ping"
-    {:ok, data} = Poison.encode(%{id: agent_id, secret: "mysecret", data: %{hello: "world"}})
-    headers = [{"Content-Type", "application/json"}]
+    {:ok, data} = encode_ping(mime_type, agent_id)
+    headers = [{"Content-Type", mime_type}]
 
     post(url, data, headers)
+  end
+
+  defp encode_ping("application/json", agent_id) do
+    Poison.encode(%{id: agent_id, secret: "mysecret", data: %{hello: "world"}})
+  end
+
+  defp encode_ping("application/msgpack", agent_id) do
+    Msgpax.pack(%{id: agent_id, secret: "mysecret", data: %{hello: "world"}})
   end
 
 end
