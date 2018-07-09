@@ -44,14 +44,16 @@ defmodule POABackend.MixProject do
       {:websockex, "~> 0.4", only: [:test]},
 
       # Docs
-      {:ex_doc, "~> 0.18", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.18", only: :dev, runtime: false},
+
+      # Releases
+      {:distillery, "~> 1.5", runtime: false}
     ]
   end
 
   defp docs do
     [
       source_ref: "v#{@version}",
-      # main: "POABackend",
       source_url: "https://github.com/poanetwork/poa-netstats-wharehouse",
       extras: ["pages/initial_architecture.md": [filename: "initial_architecture", title: "Initial Architecture"]],
       groups_for_modules: [
