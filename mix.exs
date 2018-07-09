@@ -51,8 +51,9 @@ defmodule POABackend.MixProject do
   defp docs do
     [
       source_ref: "v#{@version}",
-      main: "POABackend",
+      # main: "POABackend",
       source_url: "https://github.com/poanetwork/poa-netstats-wharehouse",
+      extras: ["pages/initial_architecture.md": [filename: "initial_architecture", title: "Initial Architecture"]],
       groups_for_modules: [
         "POA Protocol": [
           POABackend.Protocol,

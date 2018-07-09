@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.18.3">
+    <title>Initial Architecture – poa_backend v0.1.0</title>
+    <link rel="stylesheet" href="dist/app-480ffdc169.css" />
+    
+    <script src="dist/sidebar_items-ffeb4f1e51.js"></script>
+    
+    
+    
+    
+  </head>
+  <body data-type="extras">
+    <script>try { if(localStorage.getItem('night-mode')) document.body.className += ' night-mode'; } catch (e) { }</script>
+
+<div class="main">
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Sidebar</span>
+</button>
+<button class="sidebar-button night-mode-toggle">
+  <span class="icon-theme" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Theme</span>
+</button>
+<section class="sidebar">
+
+  
+  <a href="api-reference.html" class="sidebar-projectLink">
+    <div class="sidebar-projectDetails">
+      <h1 class="sidebar-projectName">
+        poa_backend
+      </h1>
+      <h2 class="sidebar-projectVersion">
+        v0.1.0
+      </h2>
+    </div>
+    
+  </a>
+
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <input name="q" type="text" id="search-list" class="search-input" placeholder="Search" aria-label="Search" autocomplete="off" />
+  </form>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+    
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+    
+
+    
+
+    
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+
+<h1>Server Architecture</h1>
+<p>This is the diagram for the new Elixir-based architecture. We propose a new server layer between the Agents and the Sinks (with the Dashboard UI being a type of sink).</p>
+<p><img src="../assets/general_overview.png" alt="General Overview"/></p>
+<p>The Backend Server is the actor in this new Server layer. It is in charge of speaking with the Agents, receiving Data / Metrics, converting the data from the protocol messages to Elixir structures and dispatching the result to different Receivers based on a mapping in the config file.</p>
+<p><img src="../assets/backend_architecture.png" alt="Backend Architecture"/></p>
+<p>Key points:</p>
+<ul>
+<li><p><strong>Custom Protocol</strong>: The custom Protocol is the language the Agent’s Transfer and Custom Protocol Handler must speak. That defines the messages and data which can be exchanged.
+  The messages defined in the protocol can be pure JSON for now but we must think in other lighter options like messagepack
+  The messages will have (among others) a mandatory field for the “type of data” sent. The possible values for this field will be defined and are fixed, for now only an “ethereum<em>metrics” type exists. That will allow us to map the type of metric to the receiver (i.e. sending ethereum<em>metrics to the dashboard and system_metrics to a database)
+  __With this decision we remove the PRIMUS protocol</em></em></p>
+</li>
+<li><p><strong>Custom Protocol Handler</strong>: The communication between the Agents and the Backend Server is done with a custom protocol over Websockets (for now) but it is extensible (via Plugins) to different technologies like REST endpoints over HTTP or others. In order to support a new technology here we have to implement a new Custom Protocol Handler plugin and it will involve a new Agent Transfer too.
+It will be a simple Websockets server for now (probably with a light version of Phoenix or Cowboy directly).
+Each request will be executed in a separate process (handled by Cowboy/Phoenix) and will be responsible of decoding the messages from the Custom Protocol to Elixir structs.
+  Bottom line is the Agent’s Transfer speaks with the Custom Protocol Handler</p>
+</li>
+<li><p><strong>Receivers</strong>: The Custom Protocol Handler will dispatch the messages to the Receivers processes based on the “type of data” field.
+Receivers are going to be Plugins, where anyone can create its own plugin and extend the system. For now the only Receiver will be the Dashboard Receiver which will be in charge of transferring the messages to the Dashboard but we can create more Receivers like one for storing metrics in a AWS DynamoDB.
+The means to map the receivers with the type of data will be specified in the config file (as we are doing for the Agents) i.e., we can map “ethereum_metrics” going to the Dashboard Receiver and AWS DynamoDB Receiver and “system_metrics” to only the AWS DynamoDB Receiver.</p>
+</li>
+<li><p><strong>Sinks</strong>: The receivers can do anything with the data. They can send metrics to the Dashboard UI, send data to External Databases or whatever we want. For that we have to write our own Receiver and map it to the messages we want in the config file and adding our desired behaviour.
+The Dashboard UI (NodeJS) will be refactored and modified in order to speak directly with the Receiver instead of directly with the Agents. We have to modify this communication and create a new protocol.</p>
+</li>
+</ul>
+<p>This new Backend Server layer allow us to scale if the systems requires it. The way we will scale is adding more Backend Server nodes to the system</p>
+<p><img src="../assets/scaling.png" alt="Scaling"/></p>
+<p>f the system grows exponentially and the presented distributed architecture is not enough, the plugin system and the APIs will allow us to migrate to a microservice architecture easily. We will have 3 independent layers:</p>
+<ul>
+<li><p><strong>Frontend layer</strong>: This will consist in many nodes (as needed) implementing only one type of Customer Protocol Handler.</p>
+</li>
+<li><p><strong>Service layer</strong>: This will consist in a few nodes gathering the data sent from the Frontend layer, transforming the messages to known standard formats and dispatches it to the appropriate receiver.</p>
+</li>
+<li><p><strong>Receivers layer</strong>: This is a bunch of nodes running only one specific receiver.</p>
+</li>
+</ul>
+<p><img src="../assets/high_scalable.png" alt="High Scaling"/></p>
+
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" rel="help" target="_blank">ExDoc</a> (v0.18.3),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+            </span>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  <script src="dist/app-9bd040e5e5.js"></script>
+  
+  
+  
+  
+  </body>
+</html>
+

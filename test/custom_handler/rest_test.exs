@@ -6,41 +6,6 @@ defmodule CustomHandler.RESTTest do
   @base_url "localhost:4002"
 
   # ----------------------------------------
-  # /hello Endpoint Tests
-  # ----------------------------------------
-
-  test "testing the REST /hello endpoint" do
-    url = @base_url <> "/hello"
-    {:ok, data} = Poison.encode(%{id: "agentID", secret: "mysecret", data: %{hello: "world"}})
-    headers = [{"Content-Type", "application/json"}]
-
-    {200, %{"result" => "success"}} = post(url, data, headers)
-  end
-
-  test "testing the REST /hello endpoint without content-type" do
-    url = @base_url <> "/hello"
-    {:ok, data} = Poison.encode(%{id: "agentID", secret: "mysecret", data: %{hello: "world"}})
-
-    {415, :nobody} = post(url, data, [])
-  end
-
-  test "testing the REST /hello endpoint without required fields" do
-    url = @base_url <> "/hello"
-    {:ok, data} = Poison.encode(%{id: "agentID", data: %{hello: "world"}})
-    headers = [{"Content-Type", "application/json"}]
-
-    {422, :nobody} = post(url, data, headers)
-  end
-
-  test "testing the REST /hello endpoint with wrong secret" do
-    url = @base_url <> "/hello"
-    {:ok, data} = Poison.encode(%{id: "agentID", secret: "wrong_secret", data: %{hello: "world"}})
-    headers = [{"Content-Type", "application/json"}]
-
-    {401, :nobody} = post(url, data, headers)
-  end
-
-  # ----------------------------------------
   # /ping Endpoint Tests
   # ----------------------------------------
 
@@ -119,57 +84,6 @@ defmodule CustomHandler.RESTTest do
     %{active: ^active_monitors} = Supervisor.count_children(Monitor.Supervisor)
 
     assert_receive :inactive_received, 20_000
-  end
-
-  # ----------------------------------------
-  # /latency Endpoint Tests
-  # ----------------------------------------
-
-  test "testing the REST /latency endpoint" do
-    url = @base_url <> "/latency"
-    {:ok, data} = Poison.encode(%{id: "agentID", secret: "mysecret", latency: 15.0})
-    headers = [{"Content-Type", "application/json"}]
-
-    {200, %{"result" => "success"}} = post(url, data, headers)
-  end
-
-  test "testing the REST /latency endpoint without content-type" do
-    url = @base_url <> "/latency"
-    {:ok, data} = Poison.encode(%{id: "agentID", secret: "mysecret", latency: 15.0})
-
-    {415, :nobody} = post(url, data, [])
-  end
-
-  test "testing the REST /latency endpoint without required fields" do
-    url = @base_url <> "/latency"
-    {:ok, data} = Poison.encode(%{id: "agentID", latency: 15.0})
-    headers = [{"Content-Type", "application/json"}]
-
-    {422, :nobody} = post(url, data, headers)
-  end
-
-  test "testing the REST /latency endpoint without latency field" do
-    url = @base_url <> "/latency"
-    {:ok, data} = Poison.encode(%{id: "agentID", secret: "mysecret"})
-    headers = [{"Content-Type", "application/json"}]
-
-    {422, :nobody} = post(url, data, headers)
-  end
-
-  test "testing the REST /latency endpoint with wrong latency field" do
-    url = @base_url <> "/latency"
-    {:ok, data} = Poison.encode(%{id: "agentID", secret: "mysecret", latency: "no number"})
-    headers = [{"Content-Type", "application/json"}]
-
-    {422, :nobody} = post(url, data, headers)
-  end
-
-  test "testing the REST /latency endpoint with wrong secret" do
-    url = @base_url <> "/latency"
-    {:ok, data} = Poison.encode(%{id: "agentID", secret: "wrong_secret", latency: 15.0})
-    headers = [{"Content-Type", "application/json"}]
-
-    {401, :nobody} = post(url, data, headers)
   end
 
   # ----------------------------------------

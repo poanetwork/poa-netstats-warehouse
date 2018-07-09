@@ -1,0 +1,330 @@
+    <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.18.3">
+    <title>POABackend.CustomHandler – poa_backend v0.1.0</title>
+    <link rel="stylesheet" href="dist/app-480ffdc169.css" />
+    
+    <script src="dist/sidebar_items-ffeb4f1e51.js"></script>
+    
+    
+    
+    
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode')) document.body.className += ' night-mode'; } catch (e) { }</script>
+
+    <div class="main">
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Sidebar</span>
+</button>
+<button class="sidebar-button night-mode-toggle">
+  <span class="icon-theme" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Theme</span>
+</button>
+<section class="sidebar">
+
+  
+  <a href="api-reference.html" class="sidebar-projectLink">
+    <div class="sidebar-projectDetails">
+      <h1 class="sidebar-projectName">
+        poa_backend
+      </h1>
+      <h2 class="sidebar-projectVersion">
+        v0.1.0
+      </h2>
+    </div>
+    
+  </a>
+
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <input name="q" type="text" id="search-list" class="search-input" placeholder="Search" aria-label="Search" autocomplete="off" />
+  </form>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+    
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+    
+
+    
+
+    
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+
+      <h1>
+        <small class="visible-xs">poa_backend v0.1.0</small>
+        POABackend.CustomHandler <small>behaviour</small>
+        
+          <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/custom_handler.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+        
+      </h1>
+
+      
+        <section id="moduledoc">
+          <p>A Custom Handler is responsible of handling data sent from Agents (i.e. REST over HTTP, WebSockets…) “speaking” the POA Protocol.</p>
+<p>The main responsability is getting calls from Agents, transform the data into a <a href="POABackend.Protocol.Message.html#content">POABackend.Protocol.Message</a> 
+Struct and sending it to the receivers.</p>
+<h3 id="module-writing-your-custom-handler" class="section-heading">
+  <a href="#module-writing-your-custom-handler" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Writing your custom Handler
+</h3>
+
+<p>You must to <em>use</em> the POABackend.CustomHandler module. That will requires you to implement the function <code class="inline">child_spec/1</code> which will be
+called from the <code class="inline">POABackend.CustomHandler.Supervisor</code> and it must returns the child spec for the process you are going to spawn.</p>
+<pre><code class="elixir">defmodule MyHandler do
+  use POABackend.CustomHandler
+
+  def child_spec(options) do
+    Plug.Adapters.Cowboy.child_spec(scheme: options[:scheme], plug: POABackend.CustomHandler.Rest.Router, options: [port: options[:port]])
+  end
+
+end</code></pre>
+<p>In this example we are initializing our CustomHandler for REST requests using the Cowboy Plug and defining the endpoints in the <code class="inline">POABackend.CustomHandler.Rest.Router</code>
+module.</p>
+<h3 id="module-configuring-the-handlers-in-the-config-file" class="section-heading">
+  <a href="#module-configuring-the-handlers-in-the-config-file" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Configuring the handlers in the config file
+</h3>
+
+<p>So far we have created a Custom Handler but we didn’t tell <code class="inline">poa_backend</code> to start it. In order to do it we have to define the new Handler in
+the config file.</p>
+<pre><code class="elixir">config :poa_backend, 
+ :custom_handlers,
+ [
+   {:rest_custom_handler, POABackend.CustomHandler.Rest, [port: 4002]}
+ ]</code></pre>
+<p>Inside the <code class="inline">:custom_handlers</code> list we define the handlers we want to start. Each Handler is defined in a triple tuple where the first argument
+is the id for that handler, the second one is the Elixir module which implements the CustomHandler behaviour and the third one is a list for arguments
+which will be passed to the <code class="inline">child_spec/1</code> function as a parameter</p>
+<h3 id="module-helpful-functions" class="section-heading">
+  <a href="#module-helpful-functions" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Helpful functions
+</h3>
+
+<p>This module also define some helpful functions:</p>
+<ul>
+<li>send_to_receivers/1: This function will publish the incomming message to the appropiate metric type (Data Type). A Custom Handler must call it when it wants to dispatch a message.
+</li>
+<li>publish_inactive/1: Will publish an inactive message to all the metrics in the system. A Custom Handler must call it when detects if a client is disconnected or/and inactive
+</li>
+</ul>
+
+        </section>
+      
+
+      
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+          
+
+          
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+    <div class="summary-row">
+  <div class="summary-signature">
+    <a href="#publish_inactive/1">publish_inactive(agent_id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Publish an inactive message to all the metrics defined  in the config file</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#send_to_receivers/1">send_to_receivers(message)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>This function dispatches the given Message to the appropiate receivers based on the Data Type (ie :ethereum_metric)</p>
+</div>
+  
+</div>
+
+  </div>
+
+
+          
+  <div class="summary-callbacks summary">
+    <h2>
+      <a href="#callbacks">Callbacks</a>
+    </h2>
+    <div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:child_spec/1">child_spec(options)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>This function will be called from the <code class="inline">POABackend.CustomHandler.Supervisor</code> in order
+to get the child specification for start the custom handler process</p>
+</div>
+  
+</div>
+
+  </div>
+
+
+        </section>
+      
+
+      
+
+      
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Functions
+          </h1>
+          <div class="detail" id="publish_inactive/1">
+  
+  
+  <div class="detail-header">
+    <a href="#publish_inactive/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <span class="signature">publish_inactive(agent_id)</span>
+    
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/custom_handler.ex#L82" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+    
+    
+    
+  </div>
+  <section class="docstring">
+    <p>Publish an inactive message to all the metrics defined  in the config file.</p>
+<p>A Custom Handler must call this explicity when detecting if a client is inactive for a period of time</p>
+
+  </section>
+</div>
+<div class="detail" id="send_to_receivers/1">
+  
+  
+  <div class="detail-header">
+    <a href="#send_to_receivers/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <span class="signature">send_to_receivers(message)</span>
+    
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/custom_handler.ex#L73" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>send_to_receivers(<a href="POABackend.Protocol.Message.html#t:t/0">POABackend.Protocol.Message.t</a>()) :: :ok</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>This function dispatches the given Message to the appropiate receivers based on the Data Type (ie :ethereum_metric).</p>
+<p>The mapping between Data Types and Receivers is done in the config file.</p>
+<p><em>Note</em> the message must be a <a href="POABackend.Protocol.Message.html">POABackend.Protocol.Message</a> struct</p>
+
+  </section>
+</div>
+
+        </section>
+      
+
+      
+        <section id="callbacks" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#callbacks">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Callbacks
+          </h1>
+          <div class="detail" id="c:child_spec/1">
+  
+  
+  <div class="detail-header">
+    <a href="#c:child_spec/1" class="detail-link" title="Link to this callback">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this callback</span>
+    </a>
+    <span class="signature">child_spec(options)</span>
+    
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/custom_handler.ex#L57" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>child_spec(options :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">list</a>()) :: <a href="http://www.erlang.org/doc/man/supervisor.html#type-child_spec">:supervisor.child_spec</a>()</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>This function will be called from the <code class="inline">POABackend.CustomHandler.Supervisor</code> in order
+to get the child specification for start the custom handler process.</p>
+
+  </section>
+</div>
+
+        </section>
+      
+          <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" rel="help" target="_blank">ExDoc</a> (v0.18.3),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+            </span>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  <script src="dist/app-9bd040e5e5.js"></script>
+  
+  
+  
+  
+  </body>
+</html>
+

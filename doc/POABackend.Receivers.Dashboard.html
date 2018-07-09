@@ -1,0 +1,347 @@
+    <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.18.3">
+    <title>POABackend.Receivers.Dashboard – poa_backend v0.1.0</title>
+    <link rel="stylesheet" href="dist/app-480ffdc169.css" />
+    
+    <script src="dist/sidebar_items-ffeb4f1e51.js"></script>
+    
+    
+    
+    
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode')) document.body.className += ' night-mode'; } catch (e) { }</script>
+
+    <div class="main">
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Sidebar</span>
+</button>
+<button class="sidebar-button night-mode-toggle">
+  <span class="icon-theme" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Theme</span>
+</button>
+<section class="sidebar">
+
+  
+  <a href="api-reference.html" class="sidebar-projectLink">
+    <div class="sidebar-projectDetails">
+      <h1 class="sidebar-projectName">
+        poa_backend
+      </h1>
+      <h2 class="sidebar-projectVersion">
+        v0.1.0
+      </h2>
+    </div>
+    
+  </a>
+
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <input name="q" type="text" id="search-list" class="search-input" placeholder="Search" aria-label="Search" autocomplete="off" />
+  </form>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+    
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+    
+
+    
+
+    
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+
+      <h1>
+        <small class="visible-xs">poa_backend v0.1.0</small>
+        POABackend.Receivers.Dashboard
+        
+          <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receivers/dashboard.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+        
+      </h1>
+
+      
+        <section id="moduledoc">
+          <p>This is a Receiver Plugin which exposes a Websocket server and sends the metrics to the connected clients</p>
+<p>This Receiver needs some data to be put in the config file (<em>receivers</em> section), for example:</p>
+<pre><code class="elixir">{:dashboard_receiver, POABackend.Receivers.Dashboard, [
+    scheme: :http,
+    ws_url: &quot;/ws&quot;,
+    port: 8181,
+    ws_secret: &quot;mywssecret&quot;
+    ]}</code></pre>
+<ul>
+<li>scheme: the scheme type :http or :https
+</li>
+<li>ws_url: endpoint for starting websocket connection
+</li>
+<li>port: the TCP port where the websocket server will listen
+</li>
+<li>ws_secret: the secret string which the clients must put in the “wssecret” header in order to start the connection
+</li>
+</ul>
+<p><strong>All fields are mandatory</strong></p>
+
+        </section>
+      
+
+      
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+          
+
+          
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+    <div class="summary-row">
+  <div class="summary-signature">
+    <a href="#handle_inactive/2">handle_inactive(agent_id, state)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>This function is called when a Custom Handler detects a client is inactive</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#handle_message/2">handle_message(arg, state)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>In this callback is called when the Receiver process receives an erlang message</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#init_receiver/1">init_receiver(opts)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>A callback executed when the Receiver Plugin starts.
+  The argument is retrieved from the configuration file when the Receiver is defined
+  It must return <code class="inline">{:ok, state}</code>, that <code class="inline">state</code> will be keept as in <a href="https://hexdocs.pm/elixir/GenServer.html"><code class="inline">GenServer</code></a> and can be
+  retrieved in the <a href="#metrics_received/3"><code class="inline">metrics_received/3</code></a> function</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#metrics_received/3">metrics_received(metrics, from, state)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>This callback will be called every time a message to the subscribed metric type arrives. It must
+  return the tuple <code class="inline">{:ok, state}</code></p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#terminate/1">terminate(_)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>This callback is called just before the Process goes down. This is a good place for closing connections</p>
+</div>
+  
+</div>
+
+  </div>
+
+
+          
+
+        </section>
+      
+
+      
+
+      
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Functions
+          </h1>
+          <div class="detail" id="handle_inactive/2">
+  
+  
+  <div class="detail-header">
+    <a href="#handle_inactive/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <span class="signature">handle_inactive(agent_id, state)</span>
+    
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receivers/dashboard.ex#L115" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+    
+    
+    
+  </div>
+  <section class="docstring">
+    <p>  This function is called when a Custom Handler detects a client is inactive.</p>
+<p>  The Custom Handler must to call explicity to <a href="POABackend.CustomHandler.html#publish_inactive/1"><code class="inline">POABackend.CustomHandler.publish_inactive/1</code></a> and it will publish the
+  <code class="inline">inactive</code> message to all the metrics in the system (defined in the config file).</p>
+<p>Callback implementation for <a href="POABackend.Receiver.html#c:handle_inactive/2"><code class="inline">POABackend.Receiver.handle_inactive/2</code></a>.</p>
+
+  </section>
+</div>
+<div class="detail" id="handle_message/2">
+  
+  
+  <div class="detail-header">
+    <a href="#handle_message/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <span class="signature">handle_message(arg, state)</span>
+    
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receivers/dashboard.ex#L111" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+    
+    
+    
+  </div>
+  <section class="docstring">
+    <p>  In this callback is called when the Receiver process receives an erlang message.</p>
+<p>  It must return <code class="inline">{:ok, state}</code>.</p>
+<p>Callback implementation for <a href="POABackend.Receiver.html#c:handle_message/2"><code class="inline">POABackend.Receiver.handle_message/2</code></a>.</p>
+
+  </section>
+</div>
+<div class="detail" id="init_receiver/1">
+  
+  
+  <div class="detail-header">
+    <a href="#init_receiver/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <span class="signature">init_receiver(opts)</span>
+    
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receivers/dashboard.ex#L95" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+    
+    
+    
+  </div>
+  <section class="docstring">
+    <p>  A callback executed when the Receiver Plugin starts.
+  The argument is retrieved from the configuration file when the Receiver is defined
+  It must return <code class="inline">{:ok, state}</code>, that <code class="inline">state</code> will be keept as in <a href="https://hexdocs.pm/elixir/GenServer.html"><code class="inline">GenServer</code></a> and can be
+  retrieved in the <a href="#metrics_received/3"><code class="inline">metrics_received/3</code></a> function.</p>
+<p>Callback implementation for <a href="POABackend.Receiver.html#c:init_receiver/1"><code class="inline">POABackend.Receiver.init_receiver/1</code></a>.</p>
+
+  </section>
+</div>
+<div class="detail" id="metrics_received/3">
+  
+  
+  <div class="detail-header">
+    <a href="#metrics_received/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <span class="signature">metrics_received(metrics, from, state)</span>
+    
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receivers/dashboard.ex#L101" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+    
+    
+    
+  </div>
+  <section class="docstring">
+    <p>  This callback will be called every time a message to the subscribed metric type arrives. It must
+  return the tuple <code class="inline">{:ok, state}</code></p>
+<p>Callback implementation for <a href="POABackend.Receiver.html#c:metrics_received/3"><code class="inline">POABackend.Receiver.metrics_received/3</code></a>.</p>
+
+  </section>
+</div>
+<div class="detail" id="terminate/1">
+  
+  
+  <div class="detail-header">
+    <a href="#terminate/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <span class="signature">terminate(_)</span>
+    
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receivers/dashboard.ex#L133" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+    
+    
+    
+  </div>
+  <section class="docstring">
+    <p>  This callback is called just before the Process goes down. This is a good place for closing connections.</p>
+<p>Callback implementation for <a href="POABackend.Receiver.html#c:terminate/1"><code class="inline">POABackend.Receiver.terminate/1</code></a>.</p>
+
+  </section>
+</div>
+
+        </section>
+      
+
+      
+          <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" rel="help" target="_blank">ExDoc</a> (v0.18.3),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+            </span>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  <script src="dist/app-9bd040e5e5.js"></script>
+  
+  
+  
+  
+  </body>
+</html>
+
