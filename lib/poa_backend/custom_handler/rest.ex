@@ -23,6 +23,8 @@ defmodule POABackend.CustomHandler.REST do
 
   This Pluting also defines the endpoints needed to use the POA Protocol.
 
+  __All the endpoints accept pure JSON or [MessagePack](https://msgpack.org/) formats__
+
   ## _ping_ endpoint
 
   ```
@@ -32,12 +34,18 @@ defmodule POABackend.CustomHandler.REST do
   request:
 
   ```
-  Headers: {"content-type", "application/json"}
+  Headers: {"content-type", "application/json" or "application/msgpack"}
   payload:
+    JSON:
+
     {
       id: String() # agent id
       secret: String() # secret string for authentication/authorisation
     }
+
+    MessagePack:
+  
+    Same format as JSON but packed thru MessagePack library
   ```
 
   responses:
@@ -46,7 +54,7 @@ defmodule POABackend.CustomHandler.REST do
   | :--- | :---------- |
   | 200  | Success _{"result":"success"}_ |
   | 401  | Unauthorized |
-  | 415  | Unsupported Media Type (only _application/json_ allowed) |
+  | 415  | Unsupported Media Type (only _application/json_ and __application/msgpack__ allowed) |
   | 422  | Unprocessable Entity. Required fields missing|
 
   Example:
@@ -86,14 +94,20 @@ defmodule POABackend.CustomHandler.REST do
   request:
 
   ```
-  Headers: {"content-type", "application/json"}
+  Headers: {"content-type", "application/json" or "application/msgpack"}
   payload:
+    JSON:
+
     {
       id: String() # agent id
       secret: String() # secret string for authentication/authorisation
       type: String() # data type (for now only ethereum_metrics)
       data: Object() # metric data itself
     }
+
+    MessagePack:
+
+    Same format as JSON but packed thru MessagePack library
   ```
 
   responses:
@@ -102,7 +116,7 @@ defmodule POABackend.CustomHandler.REST do
   | :--- | :---------- |
   | 200  | Success _{"result":"success"}_ |
   | 401  | Unauthorized |
-  | 415  | Unsupported Media Type (only _application/json_ allowed) |
+  | 415  | Unsupported Media Type (only _application/json_ and __application/msgpack__ allowed) |
   | 422  | Unprocessable Entity. Required fields missing|
 
   Example:
@@ -142,12 +156,18 @@ defmodule POABackend.CustomHandler.REST do
   request:
 
   ```
-  Headers: {"content-type", "application/json"}
+  Headers: {"content-type", "application/json" or "application/msgpack"}
   payload:
+    JSON:
+
     {
       id: String() # agent id
       secret: String() # secret string for authentication/authorisation
     }
+
+    MessagePack:
+
+    Same format as JSON but packed thru MessagePack library
   ```
 
   responses:
@@ -156,7 +176,7 @@ defmodule POABackend.CustomHandler.REST do
   | :--- | :---------- |
   | 200  | Success _{"result":"success"}_ |
   | 401  | Unauthorized |
-  | 415  | Unsupported Media Type (only _application/json_ allowed) |
+  | 415  | Unsupported Media Type (only _application/json_ and __application/msgpack__ allowed) |
   | 422  | Unprocessable Entity. Required fields missing|
 
   Example:
@@ -197,8 +217,8 @@ defmodule POABackend.CustomHandler.REST do
     alias POABackend.Protocol.DataType
     alias POABackend.Protocol.Message
 
-    plug REST.Plugs.Accept, "application/json"
-    plug Plug.Parsers, parsers: [:json], json_decoder: Poison
+    plug REST.Plugs.Accept, ["application/json", "application/msgpack"]
+    plug Plug.Parsers, parsers: [Msgpax.PlugParser, :json], pass: ["application/msgpack", "application/json"], json_decoder: Poison
     plug REST.Plugs.RequiredFields, ~w(id secret)
     plug REST.Plugs.Authorization
     plug :match

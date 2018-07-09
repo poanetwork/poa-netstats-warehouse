@@ -34,6 +34,7 @@ defmodule POABackend.MixProject do
       {:worker_pool, "~> 3.1"},
       {:ex_aws_dynamo, "~> 2.0"},
       {:hackney, "~> 1.12"},
+      {:msgpax, "~> 2.1"},
 
       # Tests
       {:credo, "~> 0.9", only: [:dev, :test], runtime: false},

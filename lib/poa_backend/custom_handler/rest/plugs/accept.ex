@@ -10,10 +10,12 @@ defmodule POABackend.CustomHandler.REST.Plugs.Accept do
   def call(conn, accept) do
     import Plug.Conn
     
-    case List.keyfind(conn.req_headers, "content-type", 0) do
-      {"content-type", ^accept} ->
-        conn
-      _ -> 
+    with {"content-type", content_type} <- List.keyfind(conn.req_headers, "content-type", 0),
+         true <- Enum.member?(accept, content_type)
+    do
+      conn
+    else
+      _error ->
         conn
         |> send_resp(415, "")
         |> halt
