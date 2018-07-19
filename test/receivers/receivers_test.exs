@@ -1,6 +1,8 @@
 defmodule Receivers.ReceiversTest do
   use ExUnit.Case
 
+  alias POABackend.Protocol.Message
+
   test "__using__ Receiver" do
     defmodule Receiver1 do
       use POABackend.Receiver
@@ -64,15 +66,19 @@ defmodule Receivers.ReceiversTest do
 
     {:ok, _} = Receiver2.start_link(state)
 
-    POABackend.Metric.add(:ethereum_metrics, [:message1, :message2])
-    POABackend.Metric.add(:ethereum_metrics, :message3)
+    message1 = Message.new("agentID", :ethereum_metric, :data, %{"data" => :nodata})
+    message2 = Message.new("agentID2", :ethereum_metric, :data, %{"data" => :nodata})
+    message3 = Message.new("agentID3", :ethereum_metric, :data, %{"data" => :nodata})
+
+    POABackend.Metric.add(:ethereum_metrics, [message1, message2])
+    POABackend.Metric.add(:ethereum_metrics, message3)
 
     metrics_pid = Process.whereis(:ethereum_metrics)
 
     send(metrics_pid, :nothing_happens)
 
-    assert_receive {:metric_received, :message1}, 20_000
-    assert_receive {:metric_received, :message2}, 20_000
-    assert_receive {:metric_received, :message3}, 20_000
+    assert_receive {:metric_received, ^message1}, 20_000
+    assert_receive {:metric_received, ^message2}, 20_000
+    assert_receive {:metric_received, ^message3}, 20_000
   end
 end

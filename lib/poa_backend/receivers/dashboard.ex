@@ -23,6 +23,11 @@ defmodule POABackend.Receivers.Dashboard do
 
   use POABackend.Receiver
 
+  # we store the last metrics in a ETS table because when a dashboard is connected it can wait a lot until
+  # the stats get updated
+
+  @last_metrics_table :last_metrics_table
+
   alias __MODULE__
   alias POABackend.Protocol.Message
 
@@ -95,6 +100,8 @@ defmodule POABackend.Receivers.Dashboard do
   def init_receiver(opts) do
     :ok = start_websockets_server(opts)
 
+    :ok = set_up_last_metrics_table()
+
     {:ok, %{clients: []}}
   end
 
@@ -105,6 +112,17 @@ defmodule POABackend.Receivers.Dashboard do
   end
 
   def handle_message({:add_client, client}, %{clients: clients} = state) do
+
+    # we send the latest metrics in order to catch up
+    stored_metrics = :ets.tab2list(@last_metrics_table)
+
+    for {_, metrics} <- stored_metrics do
+      metrics_list = Map.to_list(metrics)
+      for {_, metric} <- metrics_list do
+        send(client, metric)
+      end
+    end
+
     {:ok, %{state | clients: [client | clients]}}
   end
 
@@ -163,11 +181,58 @@ defmodule POABackend.Receivers.Dashboard do
       end
     end
 
+    save_metrics(metrics)
+
     :ok
   end
 
   defp dispatch_metric(metric, clients) do
     dispatch_metric([metric], clients)
+  end
+
+  defp save_metrics(metrics) do
+    for metric <- metrics do
+      case metric.data["type"] do
+        "information" ->
+          save_last_information(metric)
+        "statistics" ->
+          save_last_stats(metric)
+        _ ->
+          :continue
+      end
+    end
+
+    :ok
+  end
+
+  defp save_last_information(%Message{} = metric) do
+    case :ets.lookup(@last_metrics_table, metric.agent_id) do
+      [] ->
+        :ets.insert(@last_metrics_table, {metric.agent_id, %{information: metric}})
+      [{_, last_metrics}] ->
+        last_metrics = Map.put(last_metrics, :information, metric)
+        :ets.insert(@last_metrics_table, {metric.agent_id, last_metrics})
+    end
+
+    :ok
+  end
+
+  defp save_last_stats(%Message{} = metric) do
+    case :ets.lookup(@last_metrics_table, metric.agent_id) do
+      [] ->
+        :ets.insert(@last_metrics_table, {metric.agent_id, %{stats: metric}})
+      [{_, last_metrics}] ->
+        last_metrics = Map.put(last_metrics, :stats, metric)
+        :ets.insert(@last_metrics_table, {metric.agent_id, last_metrics})
+    end
+
+    :ok
+  end
+
+  defp set_up_last_metrics_table do
+    :ets.new(@last_metrics_table, [:named_table])
+
+    :ok
   end
 
 end
