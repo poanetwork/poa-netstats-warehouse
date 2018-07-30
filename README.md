@@ -21,7 +21,21 @@ That command will create a `doc/` folder with the actual Documentation.
 
 ## Run Tests
 
-In order to run the tests we have to run the command
+`POABackend` uses [Mnesia](http://erlang.org/doc/man/mnesia.html) as a local database with [Ecto](https://hexdocs.pm/ecto/Ecto.html). In order to have this running we have to create a folder where `Mnesia` will store our data. In order to do that we have to define it in the `config/test.exs` file like this:
+
+```
+config :mnesia,
+  dir: 'your/local/path' # make sure this directory exists!
+```
+
+once we have the path defined we have to create the database (those commands must be run only once if you are going to use always this same path for testing). In your root folder run:
+
+```
+MIX_ENV=test mix ecto.create
+MIX_ENV=test mix ecto.migrate
+```
+
+Now the environment is set. We can run the tests with:
 
 ```
 mix test

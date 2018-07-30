@@ -36,3 +36,6 @@ config :poa_backend,
        [
          {:dashboard_receiver, [:ethereum_metrics]}
        ]
+
+config :mnesia,
+  dir: '_build/test' # make sure this directory exists!

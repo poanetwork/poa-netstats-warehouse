@@ -14,6 +14,8 @@ jobs:
       - run: mix local.hex --force
       - run: mix local.rebar --force
       - run: mix deps.get
+      - run: env MIX_ENV=test mix ecto.create
+      - run: env MIX_ENV=test mix ecto.migrate
       - run: mix test
       - run: mix credo
       - restore_cache:
