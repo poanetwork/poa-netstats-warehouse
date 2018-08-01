@@ -44,3 +44,20 @@ config :poa_backend,
        [
          {:dashboard_receiver, [:ethereum_metrics]}
        ]
+
+# here we define the configuration for the Authorisation endpoint
+config :poa_backend,
+       :auth_rest,
+       [
+          {:scheme, :https},
+          {:port, 4003},
+          {:keyfile, "priv/keys/localhost.key"},
+          {:certfile, "priv/keys/localhost.cert"}
+       ]
+
+config :poa_backend, POABackend.Auth.Guardian,
+  issuer: "poa_backend",
+  secret_key: "LQYmeqQfrphbxUjJltkwH4xnosLc+2S2e8KuYWctMenNY9bmgwnrH8r3ii9FP/8V"
+
+config :mnesia,
+  dir: 'priv/data/mnesia' # make sure this directory exists!
