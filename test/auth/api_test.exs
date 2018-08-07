@@ -6,6 +6,8 @@ defmodule Auth.APITest do
   @base_url "https://localhost:4003"
   @user "ferigis"
   @password "1234567890"
+  @admin "admin1"
+  @admin_pwd "password12345678"
 
   setup do
     Utils.clear_db()
@@ -105,6 +107,182 @@ defmodule Auth.APITest do
       |> post(url, headers)
 
     assert {404, :nobody} == result
+  end
+
+  # ----------------------------------------
+  # /user Endpoint Tests
+  # ----------------------------------------
+
+  test "trying to create a user with wrong Admin Credentials [JSON]" do
+    url = @base_url <> "/user"
+    mime_type = "application/json"
+    headers = [
+      {"Content-Type", mime_type},
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> "wrongpassword")}
+    ]
+
+    result =
+      %{:'agent-id' => "agentID"}
+      |> Poison.encode!()
+      |> post(url, headers)
+
+    assert {401, :nobody} == result
+  end
+
+  test "trying to create a user with wrong Admin Credentials [MSGPACK]" do
+    url = @base_url <> "/user"
+    mime_type = "application/msgpack"
+    headers = [
+      {"Content-Type", mime_type},
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> "wrongpassword")}
+    ]
+
+    result =
+      %{:'agent-id' => "agentID"}
+      |> Msgpax.pack!()
+      |> post(url, headers)
+
+    assert {401, :nobody} == result
+  end
+
+  test "create a user without credentials [JSON]" do
+    url = @base_url <> "/user"
+    mime_type = "application/json"
+    headers = [
+      {"Content-Type", mime_type},
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> @admin_pwd)}
+    ]
+
+    {200, %{"user-name" => user_name, "password" => password}} =
+      %{:'agent-id' => "agentID"}
+      |> Poison.encode!()
+      |> post(url, headers)
+
+    assert Auth.authenticate_user(user_name, password)
+  end
+
+  test "create a user without credentials [MSGPACK]" do
+    url = @base_url <> "/user"
+    mime_type = "application/msgpack"
+    headers = [
+      {"Content-Type", mime_type},
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> @admin_pwd)}
+    ]
+
+    {200, %{"user-name" => user_name, "password" => password}} =
+      %{:'agent-id' => "agentID"}
+      |> Msgpax.pack!()
+      |> post(url, headers)
+
+    assert Auth.authenticate_user(user_name, password)
+  end
+
+  test "create a user with user_name [JSON]" do
+    url = @base_url <> "/user"
+    mime_type = "application/json"
+    headers = [
+      {"Content-Type", mime_type},
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> @admin_pwd)}
+    ]
+    user_name = "newUserName"
+
+    {200, %{"user-name" => ^user_name, "password" => password}} =
+      %{:'agent-id' => "agentID", :'user-name' => user_name}
+      |> Poison.encode!()
+      |> post(url, headers)
+
+    assert Auth.authenticate_user(user_name, password)
+  end
+
+  test "create a user with user_name [MSGPACK]" do
+    url = @base_url <> "/user"
+    mime_type = "application/msgpack"
+    headers = [
+      {"Content-Type", mime_type},
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> @admin_pwd)}
+    ]
+    user_name = "newUserName"
+
+    {200, %{"user-name" => ^user_name, "password" => password}} =
+      %{:'agent-id' => "agentID", :'user-name' => user_name}
+      |> Msgpax.pack!()
+      |> post(url, headers)
+
+    assert Auth.authenticate_user(user_name, password)
+  end
+
+  test "create a user with user_name and password [JSON]" do
+    url = @base_url <> "/user"
+    mime_type = "application/json"
+    headers = [
+      {"Content-Type", mime_type},
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> @admin_pwd)}
+    ]
+    user_name = "newUserName2"
+    password = "mypasswordfornewuser"
+
+    {200, %{"user-name" => ^user_name, "password" => ^password}} =
+      %{:'agent-id' => "agentID",
+        :'user-name' => user_name,
+        :password => password}
+      |> Poison.encode!()
+      |> post(url, headers)
+
+    assert Auth.authenticate_user(user_name, password)
+  end
+
+  test "create a user with user_name and password [MSGPACK]" do
+    url = @base_url <> "/user"
+    mime_type = "application/msgpack"
+    headers = [
+      {"Content-Type", mime_type},
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> @admin_pwd)}
+    ]
+    user_name = "newUserName2"
+    password = "mypasswordfornewuser"
+
+    {200, %{"user-name" => ^user_name, "password" => ^password}} =
+      %{:'agent-id' => "agentID",
+        :'user-name' => user_name,
+        :password => password}
+      |> Msgpax.pack!()
+      |> post(url, headers)
+
+    assert Auth.authenticate_user(user_name, password)
+  end
+
+  test "create user which already exists [JSON]" do
+    url = @base_url <> "/user"
+    mime_type = "application/json"
+    headers = [
+      {"Content-Type", mime_type},
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> @admin_pwd)}
+    ]
+
+    result =
+      %{:'agent-id' => "agentID",
+        :'user-name' => @user}
+      |> Poison.encode!()
+      |> post(url, headers)
+
+    assert {409, :nobody} == result
+  end
+
+  test "create user which already exists [MSGPACK]" do
+    url = @base_url <> "/user"
+    mime_type = "application/msgpack"
+    headers = [
+      {"Content-Type", mime_type},
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> @admin_pwd)}
+    ]
+
+    result =
+      %{:'agent-id' => "agentID",
+        :'user-name' => @user}
+      |> Msgpax.pack!()
+      |> post(url, headers)
+
+    assert {409, :nobody} == result
   end
 
   # ----------------------------------------

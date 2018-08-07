@@ -47,9 +47,19 @@ config :poa_backend,
           {:certfile, "priv/keys/localhost.cert"}
        ]
 
+# this configuration is needed for Guardian, the Auth library
 config :poa_backend, POABackend.Auth.Guardian,
   issuer: "poa_backend",
   secret_key: "LQYmeqQfrphbxUjJltkwH4xnosLc+2S2e8KuYWctMenNY9bmgwnrH8r3ii9FP/8V"
 
+# this is a list of admins/passwords for authorisation endpoints
+config :poa_backend,
+       :admins,
+       [
+         {"admin1", "password12345678"},
+         {"admin2", "password87654321"}
+       ]
+
+# configuration for mnesia DB
 config :mnesia,
   dir: '_build/test' # make sure this directory exists!
