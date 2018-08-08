@@ -65,6 +65,32 @@ defmodule POABackend.Auth.Router do
     end
   end
 
+  post "/blacklist/user" do
+    with {"authorization", "Basic " <> base64} <- List.keyfind(conn.req_headers, "authorization", 0),
+         {:ok, decoded64} <- Base.decode64(base64),
+         [admin_name, admin_password] <- String.split(decoded64, ":"),
+         true <- conn.params["user"] != nil,
+         {:ok, :valid} <- Auth.authenticate_admin(admin_name, admin_password)
+    do
+      case Auth.get_user(conn.params["user"]) do
+        nil ->
+          send_resp(conn, 404, "")
+        user ->
+          {:ok, _} = Auth.deactivate_user(user)
+          send_resp(conn, 200, "")
+      end
+    else
+      false ->
+        conn
+          |> send_resp(404, "")
+          |> halt
+      _error ->
+        conn
+          |> send_resp(401, "")
+          |> halt
+    end
+  end
+
   match _ do
     send_resp(conn, 404, "")
   end
