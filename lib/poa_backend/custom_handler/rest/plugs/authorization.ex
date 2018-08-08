@@ -17,7 +17,11 @@ defmodule POABackend.CustomHandler.REST.Plugs.Authorization do
     do
       conn
     else
-      _ ->
+      {:error, :token_expired} ->
+        conn
+        |> send_resp(401, Poison.encode!(%{error: :token_expired}))
+        |> halt
+      _error ->
         conn
         |> send_resp(401, "")
         |> halt

@@ -242,6 +242,17 @@ defmodule CustomHandler.RESTTest do
     assert(original_data == REST.Plugs.RequiredFields.init(original_data))
   end
 
+  test "get a token_expired response from the backend" do
+    # create a token which expires in one second
+    user = Auth.get_user(@user)
+    {:ok, token, _} = POABackend.Auth.Guardian.encode_and_sign(user, %{}, ttl: {1, :second})
+
+    Process.sleep(2000)
+
+    assert {:error, :token_expired} == POABackend.Auth.Guardian.decode_and_verify(token)
+    assert {401, %{"error" => "token_expired"}} == ping("agentID", token)
+  end
+
   # ----------------------------------------
   # Internal functions
   # ----------------------------------------
@@ -254,12 +265,12 @@ defmodule CustomHandler.RESTTest do
   defp post(url, data, headers) do
     {:ok, response} = HTTPoison.post(url, data, headers)
 
-    body = case response.status_code do
-      200 ->
+    body = case response.body do
+      "" ->
+        :nobody
+      _ ->
         {:ok, body} = Poison.decode(response.body)
         body
-      _ ->
-        :nobody
     end
 
     {response.status_code, body}
