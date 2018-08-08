@@ -1,6 +1,8 @@
 defmodule POABackend.CustomHandler.REST.Plugs.Authorization do
   @moduledoc false
 
+  alias POABackend.Auth
+
   @behaviour Plug
 
   def init(opts) do
@@ -10,11 +12,11 @@ defmodule POABackend.CustomHandler.REST.Plugs.Authorization do
   def call(conn, _opts) do
     import Plug.Conn
 
-    secret = conn.params["secret"]
-
-    case Application.get_env(:poa_backend, :secret) do
-      ^secret ->
-        conn
+    with {"authorization", "Bearer " <> jwt_token} <- List.keyfind(conn.req_headers, "authorization", 0),
+         true <- Auth.valid_token?(jwt_token)
+    do
+      conn
+    else
       _ ->
         conn
         |> send_resp(401, "")

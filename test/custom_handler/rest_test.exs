@@ -2,45 +2,71 @@ defmodule CustomHandler.RESTTest do
   use ExUnit.Case
 
   alias POABackend.CustomHandler.REST.Monitor
+  alias POABackend.Ancillary.Utils
+  alias POABackend.Auth
 
   @base_url "localhost:4002"
+  @user "myuser1"
+  @password "1234567890"
+
+  setup_all do
+    Utils.clear_db()
+    user = create_user()
+    {:ok, token, _} = POABackend.Auth.Guardian.encode_and_sign(user)
+
+    on_exit fn ->
+      Utils.clear_db()
+    end
+
+    [token: token,
+     auth_header: {"Authorization", "Bearer " <> token}]
+  end
 
   # ----------------------------------------
   # /ping Endpoint Tests
   # ----------------------------------------
 
-  test "testing the REST /ping endpoint [JSON]" do
-    {200, %{"result" => "success"}} = ping("agentID")
+  test "testing the REST /ping endpoint [JSON]", context do
+    {200, %{"result" => "success"}} = ping("agentID", context.token)
   end
 
-  test "testing the REST /ping endpoint [MSGPACK]" do
-    {200, %{"result" => "success"}} = ping("agentID")
+  test "testing the REST /ping endpoint [MSGPACK]", context do
+    {200, %{"result" => "success"}} = ping("agentID", context.token)
   end
 
-  test "testing the REST /ping endpoint without content-type" do
-    url = @base_url <> "/ping"
-    {:ok, data} = Poison.encode(%{id: "agentID", secret: "mysecret", data: %{hello: "world"}})
-
-    {415, :nobody} = post(url, data, [])
-  end
-
-  test "testing the REST /ping endpoint without required fields" do
+  test "testing the REST /ping endpoint without content-type", context do
     url = @base_url <> "/ping"
     {:ok, data} = Poison.encode(%{id: "agentID", data: %{hello: "world"}})
-    headers = [{"Content-Type", "application/json"}]
+
+    {415, :nobody} = post(url, data, [context.auth_header])
+  end
+
+  test "testing the REST /ping endpoint without required fields", context do
+    url = @base_url <> "/ping"
+    {:ok, data} = Poison.encode(%{data: %{hello: "world"}})
+    headers = [{"Content-Type", "application/json"}, context.auth_header]
 
     {422, :nobody} = post(url, data, headers)
   end
 
-  test "testing the REST /ping endpoint with wrong secret" do
+  test "testing the REST /ping endpoint with wrong auth" do
     url = @base_url <> "/ping"
-    {:ok, data} = Poison.encode(%{id: "agentID", secret: "wrong_secret", data: %{hello: "world"}})
+    {:ok, data} = Poison.encode(%{id: "agentID", data: %{hello: "world"}})
+    headers = [{"Content-Type", "application/json"},
+               {"Authorization", "Bearer mytoken"}]
+
+    {401, :nobody} = post(url, data, headers)
+  end
+
+  test "testing the REST /ping endpoint without auth" do
+    url = @base_url <> "/ping"
+    {:ok, data} = Poison.encode(%{id: "agentID", data: %{hello: "world"}})
     headers = [{"Content-Type", "application/json"}]
 
     {401, :nobody} = post(url, data, headers)
   end
 
-  test "POST /ping send inactive after stopping sending pings" do
+  test "POST /ping send inactive after stopping sending pings", context do
     # first creating a Receiver in order to catch the inactive message
 
     defmodule Receiver1 do
@@ -77,13 +103,13 @@ defmodule CustomHandler.RESTTest do
 
     agent_id = "NewAgentID"
 
-    {200, %{"result" => "success"}} = ping(agent_id)
+    {200, %{"result" => "success"}} = ping(agent_id, context.token)
 
     active_monitors = active_monitors + 1
 
     %{active: ^active_monitors} = Supervisor.count_children(Monitor.Supervisor)
 
-    {200, %{"result" => "success"}} = ping_msgpack(agent_id)
+    {200, %{"result" => "success"}} = ping_msgpack(agent_id, context.token)
 
     %{active: ^active_monitors} = Supervisor.count_children(Monitor.Supervisor)
 
@@ -94,57 +120,58 @@ defmodule CustomHandler.RESTTest do
   # /data Endpoint Tests
   # ----------------------------------------
 
-  test "testing the REST /data endpoint [JSON]" do
-    url = @base_url <> "/data"
-    {:ok, data} = Poison.encode(%{id: "agentID", secret: "mysecret", type: "ethereum_metrics", data: %{hello: :world}})
-    headers = [{"Content-Type", "application/json"}]
-
-    {200, %{"result" => "success"}} = post(url, data, headers)
-  end
-
-  test "testing the REST /data endpoint [MSGPACK]" do
-    url = @base_url <> "/data"
-    {:ok, data} = Msgpax.pack(%{id: "agentID", secret: "mysecret", type: "ethereum_metrics", data: %{hello: :world}})
-    headers = [{"Content-Type", "application/msgpack"}]
-
-    {200, %{"result" => "success"}} = post(url, data, headers)
-  end
-
-  test "testing the REST /data endpoint without content-type" do
-    url = @base_url <> "/data"
-    {:ok, data} = Poison.encode(%{id: "agentID", secret: "mysecret", type: "ethereum_metrics", data: %{hello: :world}})
-
-    {415, :nobody} = post(url, data, [])
-  end
-
-  test "testing the REST /data endpoint without required fields" do
+  test "testing the REST /data endpoint [JSON]", context do
     url = @base_url <> "/data"
     {:ok, data} = Poison.encode(%{id: "agentID", type: "ethereum_metrics", data: %{hello: :world}})
-    headers = [{"Content-Type", "application/json"}]
+    headers = [{"Content-Type", "application/json"}, context.auth_header]
+
+    {200, %{"result" => "success"}} = post(url, data, headers)
+  end
+
+  test "testing the REST /data endpoint [MSGPACK]", context do
+    url = @base_url <> "/data"
+    {:ok, data} = Msgpax.pack(%{id: "agentID", type: "ethereum_metrics", data: %{hello: :world}})
+    headers = [{"Content-Type", "application/msgpack"}, context.auth_header]
+
+    {200, %{"result" => "success"}} = post(url, data, headers)
+  end
+
+  test "testing the REST /data endpoint without content-type", context do
+    url = @base_url <> "/data"
+    {:ok, data} = Poison.encode(%{id: "agentID", type: "ethereum_metrics", data: %{hello: :world}})
+
+    {415, :nobody} = post(url, data, [context.auth_header])
+  end
+
+  test "testing the REST /data endpoint without required fields", context do
+    url = @base_url <> "/data"
+    {:ok, data} = Poison.encode(%{type: "ethereum_metrics", data: %{hello: :world}})
+    headers = [{"Content-Type", "application/json"}, context.auth_header]
 
     {422, :nobody} = post(url, data, headers)
   end
 
-  test "testing the REST /data endpoint without data field" do
+  test "testing the REST /data endpoint without data field", context do
     url = @base_url <> "/data"
-    {:ok, data} = Poison.encode(%{id: "agentID", secret: "mysecret", type: "ethereum_metrics"})
-    headers = [{"Content-Type", "application/json"}]
+    {:ok, data} = Poison.encode(%{id: "agentID", type: "ethereum_metrics"})
+    headers = [{"Content-Type", "application/json"}, context.auth_header]
 
     {422, :nobody} = post(url, data, headers)
   end
 
-  test "testing the REST /data endpoint with wrong data field" do
+  test "testing the REST /data endpoint with wrong data field", context do
     url = @base_url <> "/data"
-    {:ok, data} = Poison.encode(%{id: "agentID", secret: "mysecret", type: "ethereum_metrics", data: ""})
-    headers = [{"Content-Type", "application/json"}]
+    {:ok, data} = Poison.encode(%{id: "agentID", type: "ethereum_metrics", data: ""})
+    headers = [{"Content-Type", "application/json"}, context.auth_header]
 
     {422, :nobody} = post(url, data, headers)
   end
 
-  test "testing the REST /data endpoint with wrong secret" do
+  test "testing the REST /data endpoint with wrong auth" do
     url = @base_url <> "/data"
-    {:ok, data} = Poison.encode(%{id: "agentID", secret: "wrong_secret", type: "ethereum_metrics", data: %{hello: :world}})
-    headers = [{"Content-Type", "application/json"}]
+    {:ok, data} = Poison.encode(%{id: "agentID", type: "ethereum_metrics", data: %{hello: :world}})
+    headers = [{"Content-Type", "application/json"},
+               {"Authorization", "Bearer mytoken"}]
 
     {401, :nobody} = post(url, data, headers)
   end
@@ -153,41 +180,42 @@ defmodule CustomHandler.RESTTest do
   # /bye Endpoint Tests
   # ----------------------------------------
 
-  test "testing the REST /bye endpoint [JSON]" do
-    url = @base_url <> "/bye"
-    {:ok, data} = Poison.encode(%{id: "agentID", secret: "mysecret", data: %{hello: "world"}})
-    headers = [{"Content-Type", "application/json"}]
-
-    {200, %{"result" => "success"}} = post(url, data, headers)
-  end
-
-  test "testing the REST /bye endpoint [MSGPACK]" do
-    url = @base_url <> "/bye"
-    {:ok, data} = Msgpax.pack(%{id: "agentID", secret: "mysecret", data: %{hello: "world"}})
-    headers = [{"Content-Type", "application/msgpack"}]
-
-    {200, %{"result" => "success"}} = post(url, data, headers)
-  end
-
-  test "testing the REST /bye endpoint without content-type" do
-    url = @base_url <> "/bye"
-    {:ok, data} = Poison.encode(%{id: "agentID", secret: "mysecret", data: %{hello: "world"}})
-
-    {415, :nobody} = post(url, data, [])
-  end
-
-  test "testing the REST /bye endpoint without required fields" do
+  test "testing the REST /bye endpoint [JSON]", context do
     url = @base_url <> "/bye"
     {:ok, data} = Poison.encode(%{id: "agentID", data: %{hello: "world"}})
-    headers = [{"Content-Type", "application/json"}]
+    headers = [{"Content-Type", "application/json"}, context.auth_header]
+
+    {200, %{"result" => "success"}} = post(url, data, headers)
+  end
+
+  test "testing the REST /bye endpoint [MSGPACK]", context do
+    url = @base_url <> "/bye"
+    {:ok, data} = Msgpax.pack(%{id: "agentID", data: %{hello: "world"}})
+    headers = [{"Content-Type", "application/msgpack"}, context.auth_header]
+
+    {200, %{"result" => "success"}} = post(url, data, headers)
+  end
+
+  test "testing the REST /bye endpoint without content-type", context do
+    url = @base_url <> "/bye"
+    {:ok, data} = Poison.encode(%{id: "agentID", data: %{hello: "world"}})
+
+    {415, :nobody} = post(url, data, [context.auth_header])
+  end
+
+  test "testing the REST /bye endpoint without required fields", context do
+    url = @base_url <> "/bye"
+    {:ok, data} = Poison.encode(%{data: %{hello: "world"}})
+    headers = [{"Content-Type", "application/json"}, context.auth_header]
 
     {422, :nobody} = post(url, data, headers)
   end
 
-  test "testing the REST /bye endpoint with wrong secret" do
+  test "testing the REST /bye endpoint with wrong auth" do
     url = @base_url <> "/bye"
-    {:ok, data} = Poison.encode(%{id: "agentID", secret: "wrong_secret", data: %{hello: "world"}})
-    headers = [{"Content-Type", "application/json"}]
+    {:ok, data} = Poison.encode(%{id: "agentID", data: %{hello: "world"}})
+    headers = [{"Content-Type", "application/json"},
+               {"Authorization", "Bearer mytoken"}]
 
     {401, :nobody} = post(url, data, headers)
   end
@@ -196,10 +224,10 @@ defmodule CustomHandler.RESTTest do
   # Other Tests
   # ----------------------------------------
 
-  test "testing an unnexisting endpoint" do
+  test "testing an unnexisting endpoint", context do
     url = @base_url <> "/thisdoesntexist"
-    {:ok, data} = Poison.encode(%{id: "agentID", secret: "mysecret", data: %{hello: "world"}})
-    headers = [{"Content-Type", "application/json"}]
+    {:ok, data} = Poison.encode(%{id: "agentID", data: %{hello: "world"}})
+    headers = [{"Content-Type", "application/json"}, context.auth_header]
 
     {404, :nobody} = post(url, data, headers)
   end
@@ -218,6 +246,11 @@ defmodule CustomHandler.RESTTest do
   # Internal functions
   # ----------------------------------------
 
+  defp create_user do
+    {:ok, user} = Auth.create_user(@user, @password)
+    user
+  end
+
   defp post(url, data, headers) do
     {:ok, response} = HTTPoison.post(url, data, headers)
 
@@ -232,28 +265,29 @@ defmodule CustomHandler.RESTTest do
     {response.status_code, body}
   end
 
-  defp ping(agent_id) do
-    gen_ping(agent_id, "application/json")
+  defp ping(agent_id, auth_token) do
+    gen_ping(agent_id, "application/json", auth_token)
   end
 
-  defp ping_msgpack(agent_id) do
-    gen_ping(agent_id, "application/msgpack")
+  defp ping_msgpack(agent_id, auth_token) do
+    gen_ping(agent_id, "application/msgpack", auth_token)
   end
 
-  defp gen_ping(agent_id, mime_type) do
+  defp gen_ping(agent_id, mime_type, auth_token) do
     url = @base_url <> "/ping"
     {:ok, data} = encode_ping(mime_type, agent_id)
-    headers = [{"Content-Type", mime_type}]
+    headers = [{"Content-Type", mime_type},
+               {"Authorization", "Bearer " <> auth_token}]
 
     post(url, data, headers)
   end
 
   defp encode_ping("application/json", agent_id) do
-    Poison.encode(%{id: agent_id, secret: "mysecret", data: %{hello: "world"}})
+    Poison.encode(%{id: agent_id, data: %{hello: "world"}})
   end
 
   defp encode_ping("application/msgpack", agent_id) do
-    Msgpax.pack(%{id: agent_id, secret: "mysecret", data: %{hello: "world"}})
+    Msgpax.pack(%{id: agent_id, data: %{hello: "world"}})
   end
 
 end
