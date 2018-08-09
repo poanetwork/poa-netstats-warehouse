@@ -13,6 +13,10 @@ defmodule Auth.AuthTest do
     []
   end
 
+  # ----------------------------------------
+  # User Tests
+  # ----------------------------------------
+
   test "create a new user" do
     alias Comeonin.Bcrypt
     user_name = "ferigis"
@@ -90,4 +94,56 @@ defmodule Auth.AuthTest do
 
     refute user_name == user_name2
   end
+
+  # ----------------------------------------
+  # Token Tests
+  # ----------------------------------------
+
+  test "create a banned token" do
+    # first we need a user
+    user_name = "ferigis"
+    password = "mypassword"
+
+    {:ok, user} = Auth.create_user(user_name, password)
+
+    # generate a token
+    {_, jwt_token, _} = Auth.Guardian.encode_and_sign(user)
+
+    {:ok, _token} = Auth.create_banned_token(jwt_token)
+    {:error, :already_exists} = Auth.create_banned_token(jwt_token)
+  end
+
+  test "create a banned token with a non JWT token" do
+    {:error, %ArgumentError{}} = Auth.create_banned_token("wrongJWTToken")
+  end
+
+  test "delete expired banned tokens" do
+    current_time = :os.system_time(:seconds)
+
+    {:ok, token1} = Auth.create_banned_token("token1", current_time - 1000)
+    {:ok, token2} = Auth.create_banned_token("token2", current_time + 1000)
+    {:ok, token3} = Auth.create_banned_token("token3", current_time - 1000)
+    {:ok, token4} = Auth.create_banned_token("token4", current_time - 1000)
+
+    all = Auth.Repo.all(Auth.Models.Token)
+
+    assert 4 == length(all)
+    assert Enum.member?(all, token1)
+    assert Enum.member?(all, token2)
+    assert Enum.member?(all, token3)
+    assert Enum.member?(all, token4)
+
+    # sending a message to the process which cleans the DB
+    POABackend.Auth.BanTokensServer
+    |> Process.whereis()
+    |> send(:purge)
+
+    Process.sleep(1000) # wait a little until the server cleans the DB
+
+    all = Auth.Repo.all(Auth.Models.Token)
+
+    assert 1 == length(all)
+    assert Enum.member?(all, token2)
+  end
+
 end
