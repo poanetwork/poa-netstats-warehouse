@@ -286,7 +286,7 @@ defmodule Auth.APITest do
   end
 
   # ----------------------------------------
-  # /blackmail/user Endpoint Tests
+  # /blacklist/user Endpoint Tests
   # ----------------------------------------
 
   test "Ban a user correctly [JSON]" do
@@ -435,7 +435,7 @@ defmodule Auth.APITest do
   end
 
   # ----------------------------------------
-  # /blackmail/token Endpoint Tests
+  # /blacklist/token Endpoint Tests
   # ----------------------------------------
 
   test "Ban a token correctly [JSON]" do
