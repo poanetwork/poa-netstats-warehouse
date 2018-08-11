@@ -81,6 +81,7 @@ defmodule POABackend.Auth do
     alias Comeonin.Bcrypt
 
     with user <- get_user(user_name),
+         true <- user != nil,
          true <- Bcrypt.checkpw(password, user.password_hash),
          true <- user_active?(user)
     do
