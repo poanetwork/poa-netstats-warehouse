@@ -19,7 +19,8 @@ defmodule POABackend.Auth.Router do
          [user_name, password] <- String.split(decoded64, ":"),
          {:ok, user} <- Auth.authenticate_user(user_name, password)
     do
-      {:ok, token, _} = POABackend.Auth.Guardian.encode_and_sign(user, %{}, ttl: @token_default_ttl)
+      ttl = Application.get_env(:poa_backend, :jwt_ttl, @token_default_ttl)
+      {:ok, token, _} = POABackend.Auth.Guardian.encode_and_sign(user, %{}, ttl: ttl)
 
       {:ok, result} =
         %{token: token}
