@@ -7,7 +7,7 @@ defmodule POABackend.Application do
     import Supervisor.Spec
 
     children = [
-      supervisor(POABackend.Auth.Repo, []),
+      supervisor(POABackend.Auth.Supervisor, []),
       supervisor(POABackend.CustomHandler.Supervisor, []),
       supervisor(POABackend.Metrics.Supervisor, []),
       supervisor(POABackend.Receivers.Supervisor, [])

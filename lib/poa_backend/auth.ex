@@ -65,6 +65,22 @@ defmodule POABackend.Auth do
   """
   @spec user_active?(User.t) :: Boolean.t
   def user_active?(%User{active: true}), do: true
-  def user_active?(%User{active: _}), do: false 
+  def user_active?(%User{active: _}), do: false
+
+  @doc """
+  This function authenticates a user/password pair
+  """
+  @spec authenticate_user(String.t, String.t) :: {:ok, User.t} | {:error, :notvalid}
+  def authenticate_user(user, password) do
+    alias Comeonin.Bcrypt
+
+    with user <- get_user(user),
+         true <- Bcrypt.checkpw(password, user.password_hash)
+    do
+      {:ok, user}
+    else
+      _error -> {:error, :notvalid}
+    end
+  end
 
 end

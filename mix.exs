@@ -40,7 +40,9 @@ defmodule POABackend.MixProject do
       {:hackney, "~> 1.12"},
       {:msgpax, "~> 2.1"},
       {:ecto_mnesia, "~> 0.9.1"},
-      {:comeonin, "~> 3.2"},
+      {:guardian, "~> 1.1"},
+      {:comeonin, "~> 4.0"},
+      {:bcrypt_elixir, "~> 0.12"},
 
       # Tests
       {:credo, "~> 0.9", only: [:dev, :test], runtime: false},
@@ -51,7 +53,7 @@ defmodule POABackend.MixProject do
       {:websockex, "~> 0.4", only: [:test]},
 
       # Docs
-      {:ex_doc, "~> 0.18", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.18.0", only: :dev, runtime: false},
 
       # Releases
       {:distillery, "~> 1.5", runtime: false}
