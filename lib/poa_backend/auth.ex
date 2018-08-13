@@ -71,11 +71,12 @@ defmodule POABackend.Auth do
   This function authenticates a user/password pair
   """
   @spec authenticate_user(String.t, String.t) :: {:ok, User.t} | {:error, :notvalid}
-  def authenticate_user(user, password) do
+  def authenticate_user(user_name, password) do
     alias Comeonin.Bcrypt
 
-    with user <- get_user(user),
-         true <- Bcrypt.checkpw(password, user.password_hash)
+    with user <- get_user(user_name),
+         true <- Bcrypt.checkpw(password, user.password_hash),
+         true <- user_active?(user)
     do
       {:ok, user}
     else
@@ -83,4 +84,69 @@ defmodule POABackend.Auth do
     end
   end
 
+  @doc """
+  Authenticates an Admin
+  """
+  @spec authenticate_admin(String.t, String.t) :: {:ok, :valid} | {:error, :notvalid}
+  def authenticate_admin(admin_name, password) do
+    with admins <- Application.get_env(:poa_backend, :admins),
+         true <- Enum.member?(admins, {admin_name, password})
+    do
+      {:ok, :valid}
+    else
+      _error -> {:error, :notvalid}
+    end
+  end
+
+  @doc """
+  Generates a valid user name randomply
+  """
+  @spec generate_user_name() :: String.t
+  def generate_user_name do
+    8
+    |> random_string()
+    |> generate_user_name()
+  end
+
+  @doc """
+  This function is exported for testing purposes
+  """
+  @spec generate_user_name(String.t) :: String.t
+  def generate_user_name(user_name) do
+    case valid_user_name?(user_name) do
+      true -> user_name
+      false -> generate_user_name()
+    end
+  end
+
+  @doc """
+  Generates a password randomply
+  """
+  @spec generate_password() :: String.t
+  def generate_password do
+    random_string(15)
+  end
+
+  @doc """
+  Validates if a given user name is valid or not. It is valid if doesn't exist a user
+  with that name in the database already
+  """
+  @spec valid_user_name?(String.t) :: Boolean.t
+  def valid_user_name?(user_name) do
+    case get_user(user_name) do
+      nil -> true
+      _ -> false
+    end
+  end
+
+  # ---------------------------------------
+  # Private Functions
+  # ---------------------------------------
+
+  defp random_string(length) do
+    length
+    |> :crypto.strong_rand_bytes()
+    |> Base.url_encode64
+    |> binary_part(0, length)
+  end
 end
