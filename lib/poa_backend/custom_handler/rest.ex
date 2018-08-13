@@ -219,7 +219,7 @@ defmodule POABackend.CustomHandler.REST do
 
     plug REST.Plugs.Accept, ["application/json", "application/msgpack"]
     plug Plug.Parsers, parsers: [Msgpax.PlugParser, :json], pass: ["application/msgpack", "application/json"], json_decoder: Poison
-    plug REST.Plugs.RequiredFields, ~w(id secret)
+    plug REST.Plugs.RequiredFields, ~w(id)
     plug REST.Plugs.Authorization
     plug :match
     plug :dispatch
