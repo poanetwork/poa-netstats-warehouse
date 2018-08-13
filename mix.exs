@@ -9,6 +9,7 @@ defmodule POABackend.MixProject do
       version: @version,
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
+      elixirc_paths: elixirc_paths(Mix.env),
       deps: deps(),
       aliases: aliases(),
       docs: docs(),
@@ -16,10 +17,13 @@ defmodule POABackend.MixProject do
     ]
   end
 
+  defp elixirc_paths(:test), do: ["lib", "test/ancillary"]
+  defp elixirc_paths(_),     do: ["lib"]
+
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger, :cowboy, :plug, :poison, :worker_pool],
+      extra_applications: [:logger, :cowboy, :plug, :poison, :worker_pool, :ecto_mnesia],
       mod: {POABackend.Application, []}
     ]
   end
@@ -35,6 +39,8 @@ defmodule POABackend.MixProject do
       {:ex_aws_dynamo, "~> 2.0"},
       {:hackney, "~> 1.12"},
       {:msgpax, "~> 2.1"},
+      {:ecto_mnesia, "~> 0.9.1"},
+      {:comeonin, "~> 3.2"},
 
       # Tests
       {:credo, "~> 0.9", only: [:dev, :test], runtime: false},
