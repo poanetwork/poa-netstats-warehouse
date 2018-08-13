@@ -6,6 +6,7 @@ defmodule POABackend.Auth do
 
   alias POABackend.Auth.Models.User
   alias POABackend.Auth.Repo
+  alias POABackend.Auth
 
   @doc """
   Registers a user in the system.
@@ -136,6 +137,21 @@ defmodule POABackend.Auth do
     case get_user(user_name) do
       nil -> true
       _ -> false
+    end
+  end
+
+  @doc """
+  Validates if a JWT token is valid.
+  """
+  @spec valid_token?(String.t) :: Boolean.t
+  def valid_token?(jwt_token) do
+    with {:ok, claims} <- Auth.Guardian.decode_and_verify(jwt_token),
+         {:ok, user, ^claims} <- Auth.Guardian.resource_from_token(jwt_token),
+         true <- user_active?(user)
+    do
+      true
+    else
+      _error -> false
     end
   end
 
