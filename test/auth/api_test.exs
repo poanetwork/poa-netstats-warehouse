@@ -94,6 +94,38 @@ defmodule Auth.APITest do
     assert {401, :nobody} == result
   end
 
+  test "try with a user who doesn't exist [JSON]" do
+    url = @base_url <> "/session"
+    mime_type = "application/json"
+    headers = [
+      {"Content-Type", mime_type},
+      {"authorization", "Basic " <> Base.encode64("nonexistinguser" <> ":" <> "password")}
+    ]
+
+    result =
+      %{:'agent-id' => "agentID"}
+      |> Poison.encode!()
+      |> post(url, headers)
+
+    assert {401, :nobody} == result
+  end
+
+  test "try with a user who doesn't exist [MSGPACK]" do
+    url = @base_url <> "/session"
+    mime_type = "application/msgpack"
+    headers = [
+      {"Content-Type", mime_type},
+      {"authorization", "Basic " <> Base.encode64("nonexistinguser" <> ":" <> "password")}
+    ]
+
+    result =
+      %{:'agent-id' => "agentID"}
+      |> Msgpax.pack!()
+      |> post(url, headers)
+
+    assert {401, :nobody} == result
+  end
+
   test "testing an unnexisting endpoint" do
     url = @base_url <> "/thisdoesntexist"
     mime_type = "application/json"
