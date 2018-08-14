@@ -4,11 +4,11 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="generator" content="ExDoc v0.18.3">
+    <meta name="generator" content="ExDoc v0.18.4">
     <title>API Reference – poa_backend v0.1.0</title>
     <link rel="stylesheet" href="dist/app-480ffdc169.css" />
     
-    <script src="dist/sidebar_items-ffeb4f1e51.js"></script>
+    <script src="dist/sidebar_items-3739fd4c82.js"></script>
     
     
     
@@ -29,7 +29,7 @@
 <section class="sidebar">
 
   
-  <a href="api-reference.html" class="sidebar-projectLink">
+  <a href="POABackend.html" class="sidebar-projectLink">
     <div class="sidebar-projectDetails">
       <h1 class="sidebar-projectName">
         poa_backend
@@ -84,7 +84,48 @@
       <div class="summary-row">
   <div class="summary-signature"><a href="POABackend.html">POABackend</a></div>
   
-    <div class="summary-synopsis"><p>Storage and data-processing companion for the <a href="https://github.com/poanetwork/poa-netstats-agent">poa-netstats-agent</a></p>
+    <div class="summary-synopsis"><h1>POABackend</h1>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature"><a href="POABackend.Auth.html">POABackend.Auth</a></div>
+  
+    <div class="summary-synopsis"><p>This module defines the API for the Authorisation</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature"><a href="POABackend.Auth.Guardian.Plug.html">POABackend.Auth.Guardian.Plug</a></div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature"><a href="POABackend.Auth.Models.Token.html">POABackend.Auth.Models.Token</a></div>
+  
+    <div class="summary-synopsis"><p>This module encapsulates the <em>Token</em> model. This is used in order to store banned tokens in Database</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature"><a href="POABackend.Auth.Models.User.html">POABackend.Auth.Models.User</a></div>
+  
+    <div class="summary-synopsis"><p>This module encapsulates the <em>User</em> model</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature"><a href="POABackend.Auth.REST.html">POABackend.Auth.REST</a></div>
+  
+    <div class="summary-synopsis"><p>Here we define the REST Endpoints for Authentication/Authorization features in <code class="inline">poa_backend</code>.
+There are two types of users who will use this Endpoints. </p>
+<ul>
+<li>One is the standard user which is associated to one Agent. This user will call only the <em>/session</em> endpoint in order to retrieve a <a href="https://jwt.io">JWT</a> token
+needed for using the <em>POA Protocol</em> Endpoints. Those users are stored in a Database.
+</li>
+<li>The other kind of users are the POA administrators. This users can create <em>normal</em> users using the <em>/user</em> Endpoint, banning tokens, banning users…
+Those Admins are defined in the Config (ie <code class="inline">prod.exs</code>) file and are loaded when the app starts. This is an example of how the Admins are defined
+</li>
+</ul>
 </div>
   
 </div>
@@ -168,7 +209,7 @@
         <p>
           <span class="line">
             Built using
-            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" rel="help" target="_blank">ExDoc</a> (v0.18.3),
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" rel="help" target="_blank">ExDoc</a> (v0.18.4),
           </span>
           <span class="line">
             designed by

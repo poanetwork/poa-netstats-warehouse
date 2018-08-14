@@ -1,0 +1,432 @@
+    <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.18.4">
+    <title>POABackend.Auth.REST – poa_backend v0.1.0</title>
+    <link rel="stylesheet" href="dist/app-480ffdc169.css" />
+    
+    <script src="dist/sidebar_items-3739fd4c82.js"></script>
+    
+    
+    
+    
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode')) document.body.className += ' night-mode'; } catch (e) { }</script>
+
+    <div class="main">
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Sidebar</span>
+</button>
+<button class="sidebar-button night-mode-toggle">
+  <span class="icon-theme" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Theme</span>
+</button>
+<section class="sidebar">
+
+  
+  <a href="POABackend.html" class="sidebar-projectLink">
+    <div class="sidebar-projectDetails">
+      <h1 class="sidebar-projectName">
+        poa_backend
+      </h1>
+      <h2 class="sidebar-projectVersion">
+        v0.1.0
+      </h2>
+    </div>
+    
+  </a>
+
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <input name="q" type="text" id="search-list" class="search-input" placeholder="Search" aria-label="Search" autocomplete="off" />
+  </form>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+    
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+    
+
+    
+
+    
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+
+      <h1>
+        <small class="visible-xs">poa_backend v0.1.0</small>
+        POABackend.Auth.REST
+        
+          <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/auth/rest.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+        
+      </h1>
+
+      
+        <section id="moduledoc">
+          <p>Here we define the REST Endpoints for Authentication/Authorization features in <code class="inline">poa_backend</code>.
+There are two types of users who will use this Endpoints. </p>
+<ul>
+<li>One is the standard user which is associated to one Agent. This user will call only the <em>/session</em> endpoint in order to retrieve a <a href="https://jwt.io">JWT</a> token
+needed for using the <em>POA Protocol</em> Endpoints. Those users are stored in a Database.
+</li>
+<li>The other kind of users are the POA administrators. This users can create <em>normal</em> users using the <em>/user</em> Endpoint, banning tokens, banning users…
+Those Admins are defined in the Config (ie <code class="inline">prod.exs</code>) file and are loaded when the app starts. This is an example of how the Admins are defined
+</li>
+</ul>
+<pre><code class="elixir">      config :poa_backend,
+       :admins,
+       [
+         {&quot;admin1&quot;, &quot;password12345678&quot;},
+         {&quot;admin2&quot;, &quot;password87654321&quot;}
+       ]</code></pre>
+<p>Those Endpoints must run under <em><strong>https</strong></em> schema</p>
+<h2 id="module-session-endpoint" class="section-heading">
+  <a href="#module-session-endpoint" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Session Endpoint
+</h2>
+
+<p>This endpoint will be responsible of returning valid JWT tokens to the Agents if they use a valid user/password for authentication. The form of the endpoint is:</p>
+<p><code class="inline">POST /session</code></p>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left">HTTP header</th><th style="text-align: left">Values</th>
+</tr>
+</thead>
+<tr>
+<td style="text-align: left">content-type</td><td style="text-align: left">application/json or application/msgpack</td>
+</tr>
+<tr>
+<td style="text-align: left">authorization</td><td style="text-align: left">Basic encodeBase64(username + “:” + password)</td>
+</tr>
+</table>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left">Payload</th><th style="text-align: left">Value</th>
+</tr>
+</thead>
+<tr>
+<td style="text-align: left">JSON</td><td style="text-align: left">{“agent-id”:”theAgentID”}</td>
+</tr>
+<tr>
+<td style="text-align: left">MessagePack</td><td style="text-align: left">Same as JSON but packed with MessagePack</td>
+</tr>
+</table>
+<p>Response:</p>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left">CODE</th><th style="text-align: left">Description</th>
+</tr>
+</thead>
+<tr>
+<td style="text-align: left">200</td><td style="text-align: left">Success: {“token”:”NewToken”}</td>
+</tr>
+<tr>
+<td style="text-align: left">401</td><td style="text-align: left">Authentication failed</td>
+</tr>
+<tr>
+<td style="text-align: left">415</td><td style="text-align: left">Unsupported Media Type (only application/json and application/msgpack allowed)</td>
+</tr>
+</table>
+<p>Example:</p>
+<pre><code class="elixir">curl -i -X POST -H &quot;Authorization: Basic Ump1YURzdi06WHY3X0xvQ0FVZVduYmN5&quot; -H &quot;Content-Type: application/json&quot; https://localhost:4003/session --insecure
+
+HTTP/1.1 200 OK
+server: Cowboy
+date: Fri, 10 Aug 2018 20:25:05 GMT
+content-length: 362
+cache-control: max-age=0, private, must-revalidate
+
+{&quot;token&quot;:&quot;eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJwb2FfYmFja2VuZCIsImV4cCI6MTUzMzkzNjMwNiwiaWF0IjoxNTMzOTMyNzA2LCJpc3MiOiJwb2FfYmFja2VuZCIsImp0aSI6ImI0MzBkNTMwLWExZDYtNDk1Yy1hMjYyLThjNTcxMmM1OTM4YSIsIm5iZiI6MTUzMzkzMjcwNSwic3ViIjoiUmp1YURzdi0iLCJ0eXAiOiJhY2Nlc3MifQ.E3gqpCxY5wAAhZwcr7vZVLcC7X-bSHcXfX6NgeJc-LMbpcDgJvZgcgYQ-VTIkulb2mWw_Fjc7sXVwYMeIIliMg&quot;}</code></pre>
+<h2 id="module-user-endpoint" class="section-heading">
+  <a href="#module-user-endpoint" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  User Endpoint
+</h2>
+
+<p>This Endpoint is needed in order to add a new user. Only Admin people can do that.</p>
+<p><code class="inline">POST /user</code></p>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left">HTTP header</th><th style="text-align: left">Values</th>
+</tr>
+</thead>
+<tr>
+<td style="text-align: left">content-type</td><td style="text-align: left">application/json or application/msgpack</td>
+</tr>
+<tr>
+<td style="text-align: left">authorization</td><td style="text-align: left">Basic encodeBase64(adminname + “:” + password)</td>
+</tr>
+</table>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left">Payload</th><th style="text-align: left">Value</th>
+</tr>
+</thead>
+<tr>
+<td style="text-align: left">JSON</td><td style="text-align: left">{“agent-id”: “AgentId”, user-name”:”userName”, “password”: “mypassword”}</td>
+</tr>
+<tr>
+<td style="text-align: left">MessagePack</td><td style="text-align: left">Same as JSON but packed with MessagePack</td>
+</tr>
+</table>
+<p><em><em>NOTE</em></em> <code class="inline">user-name</code> and <code class="inline">password</code> field are optional. If we send only the <code class="inline">user-name</code> the server will create a random password. If we don’t send any value the the server
+will create both, <code class="inline">user-name</code> and <code class="inline">password</code></p>
+<p>Response</p>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left">CODE</th><th style="text-align: left">Description</th>
+</tr>
+</thead>
+<tr>
+<td style="text-align: left">200</td><td style="text-align: left">Success: {“user”:”Username”, “password”:”mypassword”}</td>
+</tr>
+<tr>
+<td style="text-align: left">401</td><td style="text-align: left">Authentication failed</td>
+</tr>
+<tr>
+<td style="text-align: left">409</td><td style="text-align: left">The user already exists</td>
+</tr>
+<tr>
+<td style="text-align: left">415</td><td style="text-align: left">Unsupported Media Type (only application/json and application/msgpack allowed)</td>
+</tr>
+</table>
+<p>Example:</p>
+<pre><code class="elixir">curl -i -X POST -H &quot;Authorization: Basic YWRtaW4xOnBhc3N3b3JkMTIzNDU2Nzg=&quot; -H &quot;Content-Type: application/json&quot; https://localhost:4003/user --insecure
+
+HTTP/1.1 200 OK
+server: Cowboy
+date: Fri, 10 Aug 2018 20:40:04 GMT
+content-length: 53
+cache-control: max-age=0, private, must-revalidate
+
+{&quot;user-name&quot;:&quot;vhuevkMy&quot;,&quot;password&quot;:&quot;XkBCEJmuuEzPvy8&quot;}</code></pre>
+<h2 id="module-blacklist-token-endpoint" class="section-heading">
+  <a href="#module-blacklist-token-endpoint" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Blacklist Token Endpoint
+</h2>
+
+<p>This Endpoint is used when we want to ban a single JWT Token (not the entire user) and that will convert that Token invalid. This Endpoint is only called by Admins.</p>
+<p>In order to achive that we have to track the tokens in a Mnesia table. We also have to create a process which cleans the DB every day</p>
+<p><code class="inline">POST /blacklist/token</code></p>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left">HTTP header</th><th style="text-align: left">Values</th>
+</tr>
+</thead>
+<tr>
+<td style="text-align: left">content-type</td><td style="text-align: left">application/json or application/msgpack</td>
+</tr>
+<tr>
+<td style="text-align: left">authorization</td><td style="text-align: left">Basic encodeBase64(adminname + “:” + password)</td>
+</tr>
+</table>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left">Payload</th><th style="text-align: left">Value</th>
+</tr>
+</thead>
+<tr>
+<td style="text-align: left">JSON</td><td style="text-align: left">{“token”:”myJWTToken”}</td>
+</tr>
+<tr>
+<td style="text-align: left">MessagePack</td><td style="text-align: left">Same as JSON but packed with MessagePack</td>
+</tr>
+</table>
+<p>Response</p>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left">CODE</th><th style="text-align: left">Description</th>
+</tr>
+</thead>
+<tr>
+<td style="text-align: left">200</td><td style="text-align: left">Success</td>
+</tr>
+<tr>
+<td style="text-align: left">401</td><td style="text-align: left">Authentication failed</td>
+</tr>
+<tr>
+<td style="text-align: left">404</td><td style="text-align: left">The Token is not valid</td>
+</tr>
+<tr>
+<td style="text-align: left">415</td><td style="text-align: left">Unsupported Media Type (only application/json and application/msgpack allowed)</td>
+</tr>
+</table>
+<p>Example:</p>
+<pre><code class="elixir">curl -i -d &#39;{&quot;token&quot;:&quot;eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJwb2FfYmFja2VuZCIsImV4cCI6MTUzMzkzNjMwNiwiaWF0IjoxNTMzOTMyNzA2LCJpc3MiOiJwb2FfYmFja2VuZCIsImp0aSI6ImI0MzBkNTMwLWExZDYtNDk1Yy1hMjYyLThjNTcxMmM1OTM4YSIsIm5iZiI6MTUzMzkzMjcwNSwic3ViIjoiUmp1YURzdi0iLCJ0eXAiOiJhY2Nlc3MifQ.E3gqpCxY5wAAhZwcr7vZVLcC7X-bSHcXfX6NgeJc-LMbpcDgJvZgcgYQ-VTIkulb2mWw_Fjc7sXVwYMeIIliMg&quot;}&#39; -X POST -H &quot;Authorization: Basic YWRtaW4xOnBhc3N3b3JkMTIzNDU2Nzg=&quot; -H &quot;Content-Type: application/json&quot; https://localhost:4003/blacklist/token --insecure
+
+HTTP/1.1 200 OK
+server: Cowboy
+date: Fri, 10 Aug 2018 20:59:25 GMT
+content-length: 0
+cache-control: max-age=0, private, must-revalidate</code></pre>
+<h2 id="module-blacklist-user-endpoint" class="section-heading">
+  <a href="#module-blacklist-user-endpoint" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Blacklist User Endpoint
+</h2>
+
+<p>This Endpoint bans a User, that will invalidate its tokens. This Endpoint is only called by Admins.</p>
+<p>In order to achive that we have to track the tokens in a Mnesia table. We also have to create a process which cleans the DB every day</p>
+<p><code class="inline">POST /blacklist/user</code></p>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left">HTTP header</th><th style="text-align: left">Values</th>
+</tr>
+</thead>
+<tr>
+<td style="text-align: left">content-type</td><td style="text-align: left">application/json or application/msgpack</td>
+</tr>
+<tr>
+<td style="text-align: left">authorization</td><td style="text-align: left">Basic encodeBase64(adminname + “:” + password)</td>
+</tr>
+</table>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left">Payload</th><th style="text-align: left">Value</th>
+</tr>
+</thead>
+<tr>
+<td style="text-align: left">JSON</td><td style="text-align: left">{“user”:”theUserName”}</td>
+</tr>
+<tr>
+<td style="text-align: left">MessagePack</td><td style="text-align: left">Same as JSON but packed with MessagePack</td>
+</tr>
+</table>
+<p>Response</p>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left">CODE</th><th style="text-align: left">Description</th>
+</tr>
+</thead>
+<tr>
+<td style="text-align: left">200</td><td style="text-align: left">Success</td>
+</tr>
+<tr>
+<td style="text-align: left">401</td><td style="text-align: left">Authentication failed</td>
+</tr>
+<tr>
+<td style="text-align: left">404</td><td style="text-align: left">The user doesn’t exist</td>
+</tr>
+<tr>
+<td style="text-align: left">415</td><td style="text-align: left">Unsupported Media Type (only application/json and application/msgpack allowed)</td>
+</tr>
+</table>
+<p>Example:</p>
+<pre><code class="elixir">curl -i -d &#39;{&quot;user&quot;:&quot;vhuevkMy&quot;}&#39; -X POST -H &quot;Authorization: Basic YWRtaW4xOnBhc3N3b3JkMTIzNDU2Nzg=&quot; -H &quot;Content-Type: application/json&quot; https://localhost:4003/blacklist/user --insecure
+
+HTTP/1.1 200 OK
+server: Cowboy
+date: Fri, 10 Aug 2018 21:55:03 GMT
+content-length: 0
+cache-control: max-age=0, private, must-revalidate</code></pre>
+
+        </section>
+      
+
+      
+
+      
+
+      
+
+      
+          <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" rel="help" target="_blank">ExDoc</a> (v0.18.4),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+            </span>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  <script src="dist/app-9bd040e5e5.js"></script>
+  
+  
+  
+  
+  </body>
+</html>
+

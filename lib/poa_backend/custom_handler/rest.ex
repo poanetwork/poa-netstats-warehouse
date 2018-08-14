@@ -25,22 +25,30 @@ defmodule POABackend.CustomHandler.REST do
 
   __All the endpoints accept pure JSON or [MessagePack](https://msgpack.org/) formats__
 
+  ## _session_ endpoint
+
+  In order to get valid access to the rest of the endpoint you will need a JWT token. In order to get it check [here](POABackend.Auth.REST.html#module-session-endpoint)
+
   ## _ping_ endpoint
 
   ```
   POST /ping
   ```
 
-  request:
+  Headers:
+  
+  HTTP header | Values
+  -- | --
+  content-type | application/json or application/msgpack
+  authorization | Bearer jwtToken
 
-  ```
-  Headers: {"content-type", "application/json" or "application/msgpack"}
   payload:
+
+  ```json
     JSON:
 
     {
       id: String() # agent id
-      secret: String() # secret string for authentication/authorisation
     }
 
     MessagePack:
@@ -60,9 +68,13 @@ defmodule POABackend.CustomHandler.REST do
   Example:
 
   ```
-  curl -v -d '{"id":"agentID", "secret":"mysecret"}' -H "Content-Type: application/json" -X POST http://localhost:4002/ping
+  curl -v -d '{"id":"agentID"}' -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJwb2FfYmFja2VuZCIsImV4cCI6MTUzMzkyNDc4NCwiaWF0IjoxNTMzOTIxMTg0LCJpc3MiOiJwb2FfYmFja2VuZCIsImp0aSI6IjFlM2U0MTU0LWJiNDMtNDY0MS04ZGFmLTIxNjRlOTFmMTU4YiIsIm5iZiI6MTUzMzkyMTE4Mywic3ViIjoiUmp1YURzdi0iLCJ0eXAiOiJhY2Nlc3MifQ.SqE48FXKhN7Y7aAsipFwvIAqetyhVJGwARMEwNwCXSK-QnXZdu3f2xkHDrXBsf1L1IlhTwg78Y-RiKrgepV34Q" -X POST http://localhost:4002/ping
 
   Note: Unnecessary use of -X or --request, POST is already inferred.
+  *   Trying ::1...
+  * TCP_NODELAY set
+  * Connection failed
+  * connect to ::1 port 4002 failed: Connection refused
   *   Trying 127.0.0.1...
   * TCP_NODELAY set
   * Connected to localhost (127.0.0.1) port 4002 (#0)
@@ -71,12 +83,13 @@ defmodule POABackend.CustomHandler.REST do
   > User-Agent: curl/7.53.1
   > Accept: */*
   > Content-Type: application/json
-  > Content-Length: 37
+  > Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJwb2FfYmFja2VuZCIsImV4cCI6MTUzMzkyNDc4NCwiaWF0IjoxNTMzOTIxMTg0LCJpc3MiOiJwb2FfYmFja2VuZCIsImp0aSI6IjFlM2U0MTU0LWJiNDMtNDY0MS04ZGFmLTIxNjRlOTFmMTU4YiIsIm5iZiI6MTUzMzkyMTE4Mywic3ViIjoiUmp1YURzdi0iLCJ0eXAiOiJhY2Nlc3MifQ.SqE48FXKhN7Y7aAsipFwvIAqetyhVJGwARMEwNwCXSK-QnXZdu3f2xkHDrXBsf1L1IlhTwg78Y-RiKrgepV34Q
+  > Content-Length: 16
   >
-  * upload completely sent off: 37 out of 37 bytes
+  * upload completely sent off: 16 out of 16 bytes
   < HTTP/1.1 200 OK
   < server: Cowboy
-  < date: Fri, 08 Jun 2018 13:27:58 GMT
+  < date: Fri, 10 Aug 2018 17:14:33 GMT
   < content-length: 20
   < cache-control: max-age=0, private, must-revalidate
   < content-type: application/json; charset=utf-8
@@ -91,16 +104,20 @@ defmodule POABackend.CustomHandler.REST do
   POST /data
   ```
 
-  request:
+  Headers:
+  
+  HTTP header | Values
+  -- | --
+  content-type | application/json or application/msgpack
+  authorization | Bearer jwtToken
 
-  ```
-  Headers: {"content-type", "application/json" or "application/msgpack"}
   payload:
+
+  ```json
     JSON:
 
     {
       id: String() # agent id
-      secret: String() # secret string for authentication/authorisation
       type: String() # data type (for now only ethereum_metrics)
       data: Object() # metric data itself
     }
@@ -122,9 +139,13 @@ defmodule POABackend.CustomHandler.REST do
   Example:
 
   ```
-  curl -v -d '{"id":"agentID", "secret":"mysecret", "type":"ethereum_metrics", "data":{"hello":"world"}}' -H "Content-Type: application/json" -X POST http://localhost:4002/data
+  curl -v -d '{"id":"agentID", "type":"ethereum_metrics", "data":{"hello":"world"}}' -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJwb2FfYmFja2VuZCIsImV4cCI6MTUzMzkyNDc4NCwiaWF0IjoxNTMzOTIxMTg0LCJpc3MiOiJwb2FfYmFja2VuZCIsImp0aSI6IjFlM2U0MTU0LWJiNDMtNDY0MS04ZGFmLTIxNjRlOTFmMTU4YiIsIm5iZiI6MTUzMzkyMTE4Mywic3ViIjoiUmp1YURzdi0iLCJ0eXAiOiJhY2Nlc3MifQ.SqE48FXKhN7Y7aAsipFwvIAqetyhVJGwARMEwNwCXSK-QnXZdu3f2xkHDrXBsf1L1IlhTwg78Y-RiKrgepV34Q" -X POST http://localhost:4002/data
 
   Note: Unnecessary use of -X or --request, POST is already inferred.
+  *   Trying ::1...
+  * TCP_NODELAY set
+  * Connection failed
+  * connect to ::1 port 4002 failed: Connection refused
   *   Trying 127.0.0.1...
   * TCP_NODELAY set
   * Connected to localhost (127.0.0.1) port 4002 (#0)
@@ -133,12 +154,13 @@ defmodule POABackend.CustomHandler.REST do
   > User-Agent: curl/7.53.1
   > Accept: */*
   > Content-Type: application/json
-  > Content-Length: 90
+  > Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJwb2FfYmFja2VuZCIsImV4cCI6MTUzMzkyNDc4NCwiaWF0IjoxNTMzOTIxMTg0LCJpc3MiOiJwb2FfYmFja2VuZCIsImp0aSI6IjFlM2U0MTU0LWJiNDMtNDY0MS04ZGFmLTIxNjRlOTFmMTU4YiIsIm5iZiI6MTUzMzkyMTE4Mywic3ViIjoiUmp1YURzdi0iLCJ0eXAiOiJhY2Nlc3MifQ.SqE48FXKhN7Y7aAsipFwvIAqetyhVJGwARMEwNwCXSK-QnXZdu3f2xkHDrXBsf1L1IlhTwg78Y-RiKrgepV34Q
+  > Content-Length: 69
   >
-  * upload completely sent off: 90 out of 90 bytes
+  * upload completely sent off: 69 out of 69 bytes
   < HTTP/1.1 200 OK
   < server: Cowboy
-  < date: Fri, 08 Jun 2018 16:02:22 GMT
+  < date: Fri, 10 Aug 2018 17:17:34 GMT
   < content-length: 20
   < cache-control: max-age=0, private, must-revalidate
   < content-type: application/json; charset=utf-8
@@ -153,16 +175,20 @@ defmodule POABackend.CustomHandler.REST do
   POST /bye
   ```
 
-  request:
+  Headers:
+  
+  HTTP header | Values
+  -- | --
+  content-type | application/json or application/msgpack
+  authorization | Bearer jwtToken
 
-  ```
-  Headers: {"content-type", "application/json" or "application/msgpack"}
   payload:
+
+  ```json
     JSON:
 
     {
       id: String() # agent id
-      secret: String() # secret string for authentication/authorisation
     }
 
     MessagePack:
@@ -182,9 +208,13 @@ defmodule POABackend.CustomHandler.REST do
   Example:
 
   ```
-  curl -v -d '{"id":"agentID", "secret":"mysecret"}' -H "Content-Type: application/json" -X POST http://localhost:4002/bye
-
+  curl -v -d '{"id":"agentID"}' -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJwb2FfYmFja2VuZCIsImV4cCI6MTUzMzkyNDc4NCwiaWF0IjoxNTMzOTIxMTg0LCJpc3MiOiJwb2FfYmFja2VuZCIsImp0aSI6IjFlM2U0MTU0LWJiNDMtNDY0MS04ZGFmLTIxNjRlOTFmMTU4YiIsIm5iZiI6MTUzMzkyMTE4Mywic3ViIjoiUmp1YURzdi0iLCJ0eXAiOiJhY2Nlc3MifQ.SqE48FXKhN7Y7aAsipFwvIAqetyhVJGwARMEwNwCXSK-QnXZdu3f2xkHDrXBsf1L1IlhTwg78Y-RiKrgepV34Q" -X POST http://localhost:4002/bye
+  
   Note: Unnecessary use of -X or --request, POST is already inferred.
+  *   Trying ::1...
+  * TCP_NODELAY set
+  * Connection failed
+  * connect to ::1 port 4002 failed: Connection refused
   *   Trying 127.0.0.1...
   * TCP_NODELAY set
   * Connected to localhost (127.0.0.1) port 4002 (#0)
@@ -193,12 +223,13 @@ defmodule POABackend.CustomHandler.REST do
   > User-Agent: curl/7.53.1
   > Accept: */*
   > Content-Type: application/json
-  > Content-Length: 37
+  > Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJwb2FfYmFja2VuZCIsImV4cCI6MTUzMzkyNDc4NCwiaWF0IjoxNTMzOTIxMTg0LCJpc3MiOiJwb2FfYmFja2VuZCIsImp0aSI6IjFlM2U0MTU0LWJiNDMtNDY0MS04ZGFmLTIxNjRlOTFmMTU4YiIsIm5iZiI6MTUzMzkyMTE4Mywic3ViIjoiUmp1YURzdi0iLCJ0eXAiOiJhY2Nlc3MifQ.SqE48FXKhN7Y7aAsipFwvIAqetyhVJGwARMEwNwCXSK-QnXZdu3f2xkHDrXBsf1L1IlhTwg78Y-RiKrgepV34Q
+  > Content-Length: 16
   >
-  * upload completely sent off: 37 out of 37 bytes
+  * upload completely sent off: 16 out of 16 bytes
   < HTTP/1.1 200 OK
   < server: Cowboy
-  < date: Fri, 08 Jun 2018 15:49:05 GMT
+  < date: Fri, 10 Aug 2018 17:19:24 GMT
   < content-length: 20
   < cache-control: max-age=0, private, must-revalidate
   < content-type: application/json; charset=utf-8
