@@ -5,8 +5,13 @@ defmodule POABackend.Auth do
   """
 
   alias POABackend.Auth.Models.User
+  alias POABackend.Auth.Models.Token
   alias POABackend.Auth.Repo
   alias POABackend.Auth
+
+  # ---------------------------------------
+  # User Functions
+  # ---------------------------------------
 
   @doc """
   Registers a user in the system.
@@ -140,12 +145,46 @@ defmodule POABackend.Auth do
     end
   end
 
+  # ---------------------------------------
+  # Token Functions
+  # ---------------------------------------
+
+  @doc """
+  Creates a token entry in the banned tokens table. It receives a jwt token in String format.
+  This function will extract the expiration time from the claims and store them in the Database.
+  """
+  @spec create_banned_token(String.t) :: {:ok, Token.t} | {:error, any()}
+  def create_banned_token(jwt_token) do
+    case Auth.Guardian.decode_and_verify(jwt_token) do
+      {:ok, %{"exp" => expires}} ->
+        create_banned_token(jwt_token, expires)
+      error ->
+        error
+    end
+  end
+
+  @doc """
+  Creates a token entry in the banned tokens table. It receives the token in String format and the
+  expiration time as Integer.
+  """
+  @spec create_banned_token(String.t, integer()) :: {:ok, Token.t} | {:error, :already_exists}
+  def create_banned_token(token, expires) do
+    try do
+      token
+      |> Token.new(expires)
+      |> Repo.insert
+    rescue
+      x in CaseClauseError -> x.term
+    end
+  end
+
   @doc """
   Validates if a JWT token is valid.
   """
   @spec valid_token?(String.t) :: Boolean.t | {:error, :token_expired}
   def valid_token?(jwt_token) do
-    with {:ok, claims} <- Auth.Guardian.decode_and_verify(jwt_token),
+    with false <- token_banned?(jwt_token),
+         {:ok, claims} <- Auth.Guardian.decode_and_verify(jwt_token),
          {:ok, user, ^claims} <- Auth.Guardian.resource_from_token(jwt_token),
          true <- user_active?(user)
     do
@@ -154,6 +193,34 @@ defmodule POABackend.Auth do
       {:error, :token_expired} = result ->
         result
       _error -> false
+    end
+  end
+
+  @doc """
+  This function deletes the banned tokens which already expired
+  """
+  @spec purge_banned_tokens() :: :ok
+  def purge_banned_tokens do
+    import Ecto.Query, only: [from: 2]
+
+    current_time = :os.system_time(:seconds)
+
+    query = from b in "banned_tokens",
+              where: b.expires < ^current_time
+
+    Auth.Repo.delete_all(query)
+
+    :ok
+  end
+
+  @doc """
+  Checks if a token is banned or not
+  """
+  @spec token_banned?(String.t) :: Boolean.t
+  def token_banned?(token) do
+    case Auth.Repo.get(Token, token) do
+      nil -> false
+      _ -> true
     end
   end
 

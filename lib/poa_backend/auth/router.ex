@@ -6,6 +6,8 @@ defmodule POABackend.Auth.Router do
   alias POABackend.CustomHandler.REST
   import Plug.Conn
 
+  @token_default_ttl {1, :hour}
+
   plug REST.Plugs.Accept, ["application/json", "application/msgpack"]
   plug Plug.Parsers, parsers: [Msgpax.PlugParser, :json], pass: ["application/msgpack", "application/json"], json_decoder: Poison
   plug :match
@@ -17,7 +19,7 @@ defmodule POABackend.Auth.Router do
          [user_name, password] <- String.split(decoded64, ":"),
          {:ok, user} <- Auth.authenticate_user(user_name, password)
     do
-      {:ok, token, _} = POABackend.Auth.Guardian.encode_and_sign(user)
+      {:ok, token, _} = POABackend.Auth.Guardian.encode_and_sign(user, %{}, ttl: @token_default_ttl)
 
       {:ok, result} =
         %{token: token}
@@ -77,6 +79,32 @@ defmodule POABackend.Auth.Router do
           send_resp(conn, 404, "")
         user ->
           {:ok, _} = Auth.deactivate_user(user)
+          send_resp(conn, 200, "")
+      end
+    else
+      false ->
+        conn
+          |> send_resp(404, "")
+          |> halt
+      _error ->
+        conn
+          |> send_resp(401, "")
+          |> halt
+    end
+  end
+
+  post "/blacklist/token" do
+    with {"authorization", "Basic " <> base64} <- List.keyfind(conn.req_headers, "authorization", 0),
+         {:ok, decoded64} <- Base.decode64(base64),
+         [admin_name, admin_password] <- String.split(decoded64, ":"),
+         true <- conn.params["token"] != nil,
+         {:ok, :valid} <- Auth.authenticate_admin(admin_name, admin_password)
+    do
+      case Auth.valid_token?(conn.params["token"]) do
+        false ->
+          send_resp(conn, 404, "")
+        true ->
+          {:ok, _} = Auth.create_banned_token(conn.params["token"])
           send_resp(conn, 200, "")
       end
     else

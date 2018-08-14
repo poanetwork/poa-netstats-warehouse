@@ -20,7 +20,8 @@ defmodule POABackend.Auth.Supervisor do
 
     children = [
       supervisor(Auth.Repo, []),
-      Plug.Adapters.Cowboy.child_spec(scheme: rest_options[:scheme], plug: Auth.Router, options: cowboy_options)
+      Plug.Adapters.Cowboy.child_spec(scheme: rest_options[:scheme], plug: Auth.Router, options: cowboy_options),
+      worker(Auth.BanTokensServer, [])
     ]
 
     opts = [strategy: :one_for_one]

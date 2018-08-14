@@ -10,7 +10,6 @@ defmodule POABackend.Auth.Models.User do
   @primary_key {:user, :string, []}
 
   schema "users" do
-    # field :user, :string, primary_key: true
     field :password_hash, :string
     field :password, :string, virtual: true
     field :active, :boolean, default: true
