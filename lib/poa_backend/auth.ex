@@ -143,7 +143,7 @@ defmodule POABackend.Auth do
   @doc """
   Validates if a JWT token is valid.
   """
-  @spec valid_token?(String.t) :: Boolean.t
+  @spec valid_token?(String.t) :: Boolean.t | {:error, :token_expired}
   def valid_token?(jwt_token) do
     with {:ok, claims} <- Auth.Guardian.decode_and_verify(jwt_token),
          {:ok, user, ^claims} <- Auth.Guardian.resource_from_token(jwt_token),
@@ -151,6 +151,8 @@ defmodule POABackend.Auth do
     do
       true
     else
+      {:error, :token_expired} = result ->
+        result
       _error -> false
     end
   end
