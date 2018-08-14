@@ -67,5 +67,13 @@ config :poa_backend,
          {"admin2", "password87654321"}
        ]
 
+# this will set the expiration in the JWT tokens, the format is `{integer, unit}` where unit is one of:
+# `:second` | `:seconds`
+# `:minute` | `:minutes`
+# `:hour` | `:hours`
+# `:week` | `:weeks`
+config :poa_backend,
+       jwt_ttl: {1, :hour}
+
 config :mnesia,
   dir: 'priv/data/mnesia' # make sure this directory exists!
