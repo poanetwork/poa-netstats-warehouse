@@ -12,7 +12,7 @@ defmodule POABackend.Metrics.Supervisor do
     metrics = Application.get_env(:poa_backend, :metrics)
 
     children = for metric <- metrics do
-      worker(POABackend.Metric, [metric])
+      worker(POABackend.Metric, [metric], id: metric)
     end
 
     opts = [strategy: :one_for_one]
