@@ -34,7 +34,8 @@ config :poa_backend,
 config :poa_backend,
        :metrics,
        [
-         :ethereum_metrics
+         :ethereum_metrics,
+         :networking_metrics
        ]
 
 # here we have to define the relationship between receivers and metric types. The format is {receiver_id, [metric_type]}.
@@ -42,7 +43,7 @@ config :poa_backend,
 config :poa_backend,
        :subscriptions,
        [
-         {:dashboard_receiver, [:ethereum_metrics]}
+         {:dashboard_receiver, [:ethereum_metrics, :networking_metrics]}
        ]
 
 # here we define the configuration for the Authorisation endpoint
