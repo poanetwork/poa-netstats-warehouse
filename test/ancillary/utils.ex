@@ -6,6 +6,7 @@ defmodule POABackend.Ancillary.Utils do
     :mnesia.clear_table(:banned_tokens)
 
     truncate(POABackend.Receivers.Models.EthStats)
+    truncate(POABackend.Receivers.Models.SystemStats)
   end
 
   defp truncate(schema) do

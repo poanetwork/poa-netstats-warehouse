@@ -1,4 +1,4 @@
-defmodule POABackend.Receivers.EthStats do
+defmodule POABackend.Receivers.Eth.Stats do
   use POABackend.Receiver
 
   @moduledoc false
