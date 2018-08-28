@@ -8,10 +8,14 @@ config :plug, :statuses, %{
 }
 
 config :poa_backend,
-  ecto_repos: [POABackend.Auth.Repo]
+  ecto_repos: [
+    POABackend.Auth.Repo,
+    POABackend.Receivers.Repo
+  ]
 
 # here we configure the needed data for Ecto and Mnesia (DB)
 config :poa_backend, POABackend.Auth.Repo,
+  priv: "priv/auth",
   adapter: EctoMnesia.Adapter,
   host: Kernel.node(),
   storage_type: :disc_copies # this will store the data on disk and memory
