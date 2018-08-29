@@ -20,14 +20,16 @@ config :poa_backend,
             port: 8181,
             ws_secret: "mywssecret"
             ]},
-          {:store_eth_stats, POABackend.Receivers.EthStats, []}
+          {:store_eth_stats, POABackend.Receivers.Eth.Stats, []},
+          {:store_system_stats, POABackend.Receivers.System.Stats, []}
        ]
 
 # here we define the type of metrics we accept. We will create a GenStage Producer per each type
 config :poa_backend,
        :metrics,
        [
-         :ethereum_metrics
+         :ethereum_metrics,
+         :system_metrics
        ]
 
 # here we have to define the relationship between receivers and metric types. The format is {receiver_id, [metric_type]}.
@@ -36,7 +38,8 @@ config :poa_backend,
        :subscriptions,
        [
          {:dashboard_receiver, [:ethereum_metrics]},
-         {:store_eth_stats, [:ethereum_metrics]}
+         {:store_eth_stats, [:ethereum_metrics]},
+         {:store_system_stats, [:system_metrics]}
        ]
 
 # here we define the configuration for the Authorisation endpoint
