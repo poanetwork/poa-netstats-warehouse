@@ -5,7 +5,7 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.18.4">
-    <title>POABackend.Receivers.Dashboard – poa_backend v0.1.0</title>
+    <title>POABackend.Receivers.Eth.Stats – poa_backend v0.1.0</title>
     <link rel="stylesheet" href="dist/app-480ffdc169.css" />
     
     <script src="dist/sidebar_items-3d14d8fe9b.js"></script>
@@ -70,9 +70,9 @@
 
       <h1>
         <small class="visible-xs">poa_backend v0.1.0</small>
-        POABackend.Receivers.Dashboard
+        POABackend.Receivers.Eth.Stats
         
-          <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receivers/dashboard.ex#L1" title="View Source" class="view-source" rel="help">
+          <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receivers/eth/stats.ex#L1" title="View Source" class="view-source" rel="help">
             <span class="icon-code" aria-hidden="true"></span>
             <span class="sr-only">View Source</span>
           </a>
@@ -81,25 +81,14 @@
 
       
         <section id="moduledoc">
-          <p>This is a Receiver Plugin which exposes a Websocket server and sends the metrics to the connected clients</p>
-<p>This Receiver needs some data to be put in the config file (<em>receivers</em> section), for example:</p>
-<pre><code class="elixir">{:dashboard_receiver, POABackend.Receivers.Dashboard, [
-    scheme: :http,
-    ws_url: &quot;/ws&quot;,
-    port: 8181,
-    ws_secret: &quot;mywssecret&quot;
-    ]}</code></pre>
-<ul>
-<li>scheme: the scheme type :http or :https
-</li>
-<li>ws_url: endpoint for starting websocket connection
-</li>
-<li>port: the TCP port where the websocket server will listen
-</li>
-<li>ws_secret: the secret string which the clients must put in the “wssecret” header in order to start the connection
-</li>
-</ul>
-<p><strong>All fields are mandatory</strong></p>
+          <p>This is a Receiver Plugin which is in charge of storing the Ethereum Statistics received from the Agents in a Postgres
+database. If we want to use it we have to declare it in the Config file, inside the <code class="inline">:receivers</code> section, ie:</p>
+<pre><code class="elixir">{:store_eth_stats, POABackend.Receivers.Eth.Stats, []}</code></pre>
+<p>This Plugin uses Postgres as a backend, specifically the <code class="inline">eth_stats</code> table. Make sure that table exists before using 
+this Plugin.</p>
+<p>We also need to subscribe this plugin to <code class="inline">:ethereum_metrics</code> metrics in the config file. For that we have to add this line
+to the list in the <code class="inline">:subscriptions</code> section:</p>
+<pre><code class="elixir">{:store_eth_stats, [:ethereum_metrics]}</code></pre>
 
         </section>
       
@@ -131,7 +120,7 @@
 </div>
 <div class="summary-row">
   <div class="summary-signature">
-    <a href="#handle_message/2">handle_message(arg, state)</a>
+    <a href="#handle_message/2">handle_message(message, state)</a>
   </div>
   
     <div class="summary-synopsis"><p>In this callback is called when the Receiver process receives an erlang message</p>
@@ -140,7 +129,7 @@
 </div>
 <div class="summary-row">
   <div class="summary-signature">
-    <a href="#init_receiver/1">init_receiver(opts)</a>
+    <a href="#init_receiver/1">init_receiver(args)</a>
   </div>
   
     <div class="summary-synopsis"><p>A callback executed when the Receiver Plugin starts.
@@ -152,7 +141,7 @@
 </div>
 <div class="summary-row">
   <div class="summary-signature">
-    <a href="#metrics_received/3">metrics_received(metrics, from, state)</a>
+    <a href="#metrics_received/3">metrics_received(arg1, from, state)</a>
   </div>
   
     <div class="summary-synopsis"><p>This callback will be called every time a message to the subscribed metric type arrives. It must
@@ -162,7 +151,7 @@
 </div>
 <div class="summary-row">
   <div class="summary-signature">
-    <a href="#terminate/1">terminate(_)</a>
+    <a href="#terminate/1">terminate(state)</a>
   </div>
   
     <div class="summary-synopsis"><p>This callback is called just before the Process goes down. This is a good place for closing connections</p>
@@ -199,7 +188,7 @@
     </a>
     <span class="signature">handle_inactive(agent_id, state)</span>
     
-      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receivers/dashboard.ex#L133" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receivers/eth/stats.ex#L39" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
@@ -223,9 +212,9 @@
       <span class="icon-link" aria-hidden="true"></span>
       <span class="sr-only">Link to this function</span>
     </a>
-    <span class="signature">handle_message(arg, state)</span>
+    <span class="signature">handle_message(message, state)</span>
     
-      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receivers/dashboard.ex#L129" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receivers/eth/stats.ex#L35" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
@@ -248,9 +237,9 @@
       <span class="icon-link" aria-hidden="true"></span>
       <span class="sr-only">Link to this function</span>
     </a>
-    <span class="signature">init_receiver(opts)</span>
+    <span class="signature">init_receiver(args)</span>
     
-      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receivers/dashboard.ex#L100" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receivers/eth/stats.ex#L23" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
@@ -275,9 +264,9 @@
       <span class="icon-link" aria-hidden="true"></span>
       <span class="sr-only">Link to this function</span>
     </a>
-    <span class="signature">metrics_received(metrics, from, state)</span>
+    <span class="signature">metrics_received(arg1, from, state)</span>
     
-      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receivers/dashboard.ex#L108" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receivers/eth/stats.ex#L31" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
@@ -300,9 +289,9 @@
       <span class="icon-link" aria-hidden="true"></span>
       <span class="sr-only">Link to this function</span>
     </a>
-    <span class="signature">terminate(_)</span>
+    <span class="signature">terminate(state)</span>
     
-      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receivers/dashboard.ex#L151" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/receivers/eth/stats.ex#L43" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
