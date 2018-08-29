@@ -4,12 +4,13 @@ fonts/icomoon.eot
 fonts/icomoon.svg
 fonts/icomoon.ttf
 fonts/icomoon.woff
-dist/sidebar_items-3739fd4c82.js
+dist/sidebar_items-3d14d8fe9b.js
 api-reference.html
 initial_architecture.html
 search.html
 404.html
 POABackend.html
+POABackend.Receivers.Repo.html
 POABackend.Auth.html
 POABackend.Auth.Guardian.Plug.html
 POABackend.Auth.Models.Token.html
@@ -24,4 +25,6 @@ POABackend.CustomHandler.REST.html
 POABackend.Receiver.html
 POABackend.Receivers.Dashboard.html
 POABackend.Receivers.DynamoDB.html
+POABackend.Receivers.Eth.Stats.html
+POABackend.Receivers.System.Stats.html
 index.html

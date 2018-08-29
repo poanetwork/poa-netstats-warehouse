@@ -23,4 +23,12 @@ config :poa_backend, POABackend.Auth.Repo,
 config :mnesia,
   dir: 'priv/data/mnesia' # make sure this directory exists!
 
+config :poa_backend, POABackend.Receivers.Repo,
+  priv: "priv/receivers", # this value is not changed
+  adapter: Ecto.Adapters.Postgres,
+  database: "poabackend_stats",
+  username: "postgres",
+  password: "postgres",
+  hostname: "localhost"
+
 import_config "#{Mix.env}.exs"

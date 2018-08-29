@@ -1,7 +1,20 @@
 defmodule POABackend.Receivers.Eth.Stats do
   use POABackend.Receiver
 
-  @moduledoc false
+  @moduledoc """
+  This is a Receiver Plugin which is in charge of storing the Ethereum Statistics received from the Agents in a Postgres
+  database. If we want to use it we have to declare it in the Config file, inside the `:receivers` section, ie:
+
+      {:store_eth_stats, POABackend.Receivers.Eth.Stats, []}
+
+  This Plugin uses Postgres as a backend, specifically the `eth_stats` table. Make sure that table exists before using 
+  this Plugin.
+
+  We also need to subscribe this plugin to `:ethereum_metrics` metrics in the config file. For that we have to add this line
+  to the list in the `:subscriptions` section:
+
+      {:store_eth_stats, [:ethereum_metrics]}
+  """
 
   alias POABackend.Protocol.Message
   alias POABackend.Receivers.Models.EthStats

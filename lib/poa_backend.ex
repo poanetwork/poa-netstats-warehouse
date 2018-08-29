@@ -21,23 +21,56 @@ defmodule POABackend do
 
   That command will create a `doc/` folder with the actual Documentation.
 
-  ## Run Tests
+  ## Configuring Databases for first time
 
-  `POABackend` uses [Mnesia](http://erlang.org/doc/man/mnesia.html) as a local database with [Ecto](https://hexdocs.pm/ecto/Ecto.html). In order to have this running we have to create a folder where `Mnesia` will store our data. In order to do that we have to define it in the `config/test.exs` file like this:
+  `POABackend` uses many Databases. For Authentication we use [Mnesia](http://erlang.org/doc/man/mnesia.html) as a local database and for some receivers which require storage we use Postgres. All databases are managed on top of [Ecto](https://hexdocs.pm/ecto/Ecto.html) a widly used database wrapper for Elixir projects.
+
+  For this reason we have to set the databases before running the `POABackend` for the first time.
+
+  - Auth Database (Mnesia): Setting up Mnesia is easy since it is working localy and is built in the Erlang Virtual Machine. We only have to say "where" we are going to store the database's files. In order to do that we have to add the configuration to the config file (`prod.exs` or `test.exs` depending if you want to run tests or production)
 
   ```
   config :mnesia,
     dir: 'your/local/path' # make sure this directory exists!
   ```
 
-  once we have the path defined we have to create the database (those commands must be run only once if you are going to use always this same path for testing). In your root folder run:
+  - Receivers Database (Postgres): This is a little more complex than Mnesia. We need a Postgres instance running somewhere and we have to add the config to the config files
+
+  ```
+  config :poa_backend, POABackend.Receivers.Repo,
+    priv: "priv/receivers", # this value is not changed
+    adapter: Ecto.Adapters.Postgres,
+    database: "poabackend_stats",
+    username: "postgres",
+    password: "postgres",
+    hostname: "localhost"
+  ```
+
+  The important fields here are `database`, `username`, `password` and `hostname`. The rest of values must remain exactly as the example.
+
+  Once we have set the database configuration we have to create and migrate the databases, in order to do that we should be in the root of the project and run:
+
+  - for production
+
+  ```
+  MIX_ENV=prod mix ecto.create
+  MIX_ENV=prod mix ecto.migrate
+  ```
+
+  - for test
 
   ```
   MIX_ENV=test mix ecto.create
   MIX_ENV=test mix ecto.migrate
   ```
 
-  Now the environment is set. We can run the tests with:
+  Now the environment is ready for running `POABackend`
+
+  ## Run Tests
+
+  The first time you run the tests you will need having the Database's environment set up. Check the previous section and set the configuration in the `config/test.exs` file.
+
+  Once the environment is set. We can run the tests with:
 
   ```
   mix test
