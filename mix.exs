@@ -43,6 +43,7 @@ defmodule POABackend.MixProject do
       {:guardian, "~> 1.1"},
       {:comeonin, "~> 4.0"},
       {:bcrypt_elixir, "~> 0.12"},
+      {:postgrex, "~> 0.13.5"},
 
       # Tests
       {:credo, "~> 0.9", only: [:dev, :test], runtime: false},

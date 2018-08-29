@@ -19,7 +19,8 @@ config :poa_backend,
             ws_url: "/ws",
             port: 8181,
             ws_secret: "mywssecret"
-            ]}
+            ]},
+          {:store_eth_stats, POABackend.Receivers.EthStats, []}
        ]
 
 # here we define the type of metrics we accept. We will create a GenStage Producer per each type
@@ -34,7 +35,8 @@ config :poa_backend,
 config :poa_backend,
        :subscriptions,
        [
-         {:dashboard_receiver, [:ethereum_metrics]}
+         {:dashboard_receiver, [:ethereum_metrics]},
+         {:store_eth_stats, [:ethereum_metrics]}
        ]
 
 # here we define the configuration for the Authorisation endpoint
@@ -63,3 +65,11 @@ config :poa_backend,
 # configuration for mnesia DB
 config :mnesia,
   dir: '_build/test' # make sure this directory exists!
+
+config :poa_backend, POABackend.Receivers.Repo,
+  priv: "priv/receivers",
+  adapter: Ecto.Adapters.Postgres,
+  database: "poabackend_stats_test",
+  username: "postgres",
+  password: "postgres",
+  hostname: "localhost"

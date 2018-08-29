@@ -30,7 +30,7 @@ defmodule Receivers.DashboardTest do
   end
 
   test "connection success" do
-    {result, pid} = Client.start_link("http://localhost:8181/ws", :state, [{:extra_headers, [{"wssecret", "mywssecret"}]}])
+    {result, pid} = Client.start_link("http://localhost:8181/ws", self(), [{:extra_headers, [{"wssecret", "mywssecret"}]}])
 
     assert :ok == result
     assert is_pid(pid)
