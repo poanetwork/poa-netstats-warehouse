@@ -19,6 +19,31 @@ mix docs
 
 That command will create a `doc/` folder with the actual Documentation.
 
+## Setting up Cert SSL
+
+`POABackend` uses `https` endpoints for Authorisation matters. In order to achieve that we have to set some configuration first.
+We would need a \*.cert and a \*.key files. We can generate them easily running:
+
+```
+openssl genrsa -out localhost.key 2048
+openssl req -new -x509 -key localhost.key -out localhost.cert -days 3650 -subj /CN=localhost
+```
+
+Those command will create the needed files. Now we have to point them in the config file. Lets check the section `:auth_rest`
+
+```
+config :poa_backend,
+       :auth_rest,
+       [
+          {:scheme, :https},
+          {:port, 4003},
+          {:keyfile, "priv/keys/localhost.key"},
+          {:certfile, "priv/keys/localhost.cert"}
+       ]
+```
+
+Here we can choose the port for the `Auth` endpoints and we must put the paths to the files we created previously (look `:keyfile` and `:certfile` fields)
+
 ## Configuring Databases for first time
 
 `POABackend` uses many Databases. For Authentication we use [Mnesia](http://erlang.org/doc/man/mnesia.html) as a local database and for some receivers which require storage we use Postgres. All databases are managed on top of [Ecto](https://hexdocs.pm/ecto/Ecto.html) a widly used database wrapper for Elixir projects.
