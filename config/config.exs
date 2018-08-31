@@ -17,7 +17,7 @@ config :poa_backend,
 config :poa_backend, POABackend.Auth.Repo,
   priv: "priv/auth",
   adapter: EctoMnesia.Adapter,
-  host: Kernel.node(),
+  host: {:system, :atom, "MNESIA_HOST", Kernel.node()},
   storage_type: :disc_copies # this will store the data on disk and memory
 
 config :mnesia,
