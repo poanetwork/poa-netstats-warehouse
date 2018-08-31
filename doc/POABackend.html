@@ -100,6 +100,25 @@
 <pre><code class="elixir">mix deps.get
 mix docs</code></pre>
 <p>That command will create a <code class="inline">doc/</code> folder with the actual Documentation.</p>
+<h2 id="module-setting-up-cert-ssl" class="section-heading">
+  <a href="#module-setting-up-cert-ssl" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Setting up Cert SSL
+</h2>
+
+<p><a href="POABackend.html#content"><code class="inline">POABackend</code></a> uses <code class="inline">https</code> endpoints for Authorisation matters. In order to achieve that we have to set some configuration first.
+We would need a <em>.cert and a </em>.key files. We can generate them easily running:</p>
+<pre><code class="elixir">openssl genrsa -out localhost.key 2048
+openssl req -new -x509 -key localhost.key -out localhost.cert -days 3650 -subj /CN=localhost</code></pre>
+<p>Those command will create the needed files. Now we have to point them in the config file. Lets check the section <code class="inline">:auth_rest</code></p>
+<pre><code class="elixir">config :poa_backend,
+       :auth_rest,
+       [
+          {:scheme, :https},
+          {:port, 4003},
+          {:keyfile, &quot;priv/keys/localhost.key&quot;},
+          {:certfile, &quot;priv/keys/localhost.cert&quot;}
+       ]</code></pre>
+<p>Here we can choose the port for the <code class="inline">Auth</code> endpoints and we must put the paths to the files we created previously (look <code class="inline">:keyfile</code> and <code class="inline">:certfile</code> fields)</p>
 <h2 id="module-configuring-databases-for-first-time" class="section-heading">
   <a href="#module-configuring-databases-for-first-time" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
   Configuring Databases for first time
