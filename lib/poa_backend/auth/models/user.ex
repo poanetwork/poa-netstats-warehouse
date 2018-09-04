@@ -22,6 +22,14 @@ defmodule POABackend.Auth.Models.User do
                          password: String.t,
                          active: :boolean}
 
+  def to_map(%User{user: username, active: active, inserted_at: inserted_at}) do
+    %{
+      user: username,
+      active: active,
+      created_at: inserted_at
+     }
+  end
+
   def changeset(%User{} = user, params \\ %{}) do
     user
     |> cast(params, ~w(user password active))
