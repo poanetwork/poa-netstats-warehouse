@@ -99,6 +99,49 @@ defmodule POABackend.Auth.REST do
   {"user-name":"vhuevkMy","password":"XkBCEJmuuEzPvy8"}
   ```
 
+  ## List User Endpoint
+
+  This Endpoint is needed in order to list the users in the system. Only Admin people can do that.
+
+  `GET /user`
+
+  HTTP header | Values
+  -- | --
+  content-type | application/json or application/msgpack
+  authorization | Basic encodeBase64(adminname + “:” + password)
+
+  Response
+
+  CODE | Description
+  -- | --
+  200 | Success: A list of users
+  401 | Authentication failed
+  415 | Unsupported Media Type (only application/json and application/msgpack allowed)
+
+  Example:
+
+  ```
+  curl -i -X GET -H "Authorization: Basic YWRtaW4xOnBhc3N3b3JkMTIzNDU2Nzg=" -H "Content-Type: application/json" https://localhost:4003/user --insecure
+
+  HTTP/1.1 200 OK
+  server: Cowboy
+  date: Mon, 03 Sep 2018 16:02:29 GMT
+  content-length: 153
+  cache-control: max-age=0, private, must-revalidate
+
+  [{"user":"HeeV-EmU","created_at":"2018-09-03T16:02:25.210308","active":true},{"user":"W75AcY8Z","created_at":"2018-09-03T16:02:13.763003","active":true}]
+  ```
+
+  The JSON format for a user is:
+
+  ```
+  {
+    "user":"Username",
+    "active":true, # active means it is not banned
+    "created_at":"2018-09-03T16:02:25.210308"
+  }
+  ```
+
   ## Blacklist Token Endpoint
 
   This Endpoint is used when we want to ban a single JWT Token (not the entire user) and that will convert that Token invalid. This Endpoint is only called by Admins.

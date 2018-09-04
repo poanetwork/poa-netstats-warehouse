@@ -95,6 +95,19 @@ defmodule Auth.AuthTest do
     refute user_name == user_name2
   end
 
+  test "get all users" do
+    assert [] == Auth.list_users()
+
+    {:ok, user1} = Auth.create_user("user_name1", "password1")
+    {:ok, user2} = Auth.create_user("user_name2", "password2")
+
+    users = Auth.list_users()
+
+    assert length(users) == 2
+    assert Enum.member?(users, user1)
+    assert Enum.member?(users, user2)
+  end
+
   # ----------------------------------------
   # Token Tests
   # ----------------------------------------

@@ -8,7 +8,7 @@
     <title>POABackend.Auth.REST – poa_backend v0.1.0</title>
     <link rel="stylesheet" href="dist/app-480ffdc169.css" />
     
-    <script src="dist/sidebar_items-3d14d8fe9b.js"></script>
+    <script src="dist/sidebar_items-b6949c5547.js"></script>
     
     
     
@@ -247,6 +247,67 @@ content-length: 53
 cache-control: max-age=0, private, must-revalidate
 
 {&quot;user-name&quot;:&quot;vhuevkMy&quot;,&quot;password&quot;:&quot;XkBCEJmuuEzPvy8&quot;}</code></pre>
+<h2 id="module-list-user-endpoint" class="section-heading">
+  <a href="#module-list-user-endpoint" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  List User Endpoint
+</h2>
+
+<p>This Endpoint is needed in order to list the users in the system. Only Admin people can do that.</p>
+<p><code class="inline">GET /user</code></p>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left">HTTP header</th><th style="text-align: left">Values</th>
+</tr>
+</thead>
+<tr>
+<td style="text-align: left">content-type</td><td style="text-align: left">application/json or application/msgpack</td>
+</tr>
+<tr>
+<td style="text-align: left">authorization</td><td style="text-align: left">Basic encodeBase64(adminname + “:” + password)</td>
+</tr>
+</table>
+<p>Response</p>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left">CODE</th><th style="text-align: left">Description</th>
+</tr>
+</thead>
+<tr>
+<td style="text-align: left">200</td><td style="text-align: left">Success: A list of users</td>
+</tr>
+<tr>
+<td style="text-align: left">401</td><td style="text-align: left">Authentication failed</td>
+</tr>
+<tr>
+<td style="text-align: left">415</td><td style="text-align: left">Unsupported Media Type (only application/json and application/msgpack allowed)</td>
+</tr>
+</table>
+<p>Example:</p>
+<pre><code class="elixir">curl -i -X GET -H &quot;Authorization: Basic YWRtaW4xOnBhc3N3b3JkMTIzNDU2Nzg=&quot; -H &quot;Content-Type: application/json&quot; https://localhost:4003/user --insecure
+
+HTTP/1.1 200 OK
+server: Cowboy
+date: Mon, 03 Sep 2018 16:02:29 GMT
+content-length: 153
+cache-control: max-age=0, private, must-revalidate
+
+[{&quot;user&quot;:&quot;HeeV-EmU&quot;,&quot;created_at&quot;:&quot;2018-09-03T16:02:25.210308&quot;,&quot;active&quot;:true},{&quot;user&quot;:&quot;W75AcY8Z&quot;,&quot;created_at&quot;:&quot;2018-09-03T16:02:13.763003&quot;,&quot;active&quot;:true}]</code></pre>
+<p>The JSON format for a user is:</p>
+<pre><code class="elixir">{
+  &quot;user&quot;:&quot;Username&quot;,
+  &quot;active&quot;:true, # active means it is not banned
+  &quot;created_at&quot;:&quot;2018-09-03T16:02:25.210308&quot;
+}</code></pre>
 <h2 id="module-blacklist-token-endpoint" class="section-heading">
   <a href="#module-blacklist-token-endpoint" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
   Blacklist Token Endpoint

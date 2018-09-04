@@ -4,6 +4,7 @@ defmodule POABackend.Auth.Router do
 
   alias POABackend.Auth
   alias POABackend.CustomHandler.REST
+  alias POABackend.Auth.Models.User
   import Plug.Conn
 
   @token_default_ttl {1, :hour}
@@ -60,6 +61,26 @@ defmodule POABackend.Auth.Router do
           |> send_resp(409, "")
           |> halt
       end
+    else
+      _error ->
+        conn
+          |> send_resp(401, "")
+          |> halt
+    end
+  end
+
+  get "/user" do
+    with {"authorization", "Basic " <> base64} <- List.keyfind(conn.req_headers, "authorization", 0),
+         {:ok, decoded64} <- Base.decode64(base64),
+         [admin_name, admin_password] <- String.split(decoded64, ":"),
+         {:ok, :valid} <- Auth.authenticate_admin(admin_name, admin_password)
+    do
+        result =
+          Auth.list_users()
+          |> Enum.map(&User.to_map(&1))
+          |> Poison.encode!
+
+        send_resp(conn, 200, result)
     else
       _error ->
         conn

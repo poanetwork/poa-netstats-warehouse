@@ -317,6 +317,39 @@ defmodule Auth.APITest do
     assert {409, :nobody} == result
   end
 
+  test "listing all the users stored" do
+    url = @base_url <> "/user"
+    mime_type = "application/msgpack"
+    headers = [
+      {"Content-Type", mime_type},
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> @admin_pwd)}
+    ]
+
+    {200, [initial_user] = users} = get(url, headers)
+
+    assert length(users) == 1 # ferigis user is created at the begining of each test
+    assert initial_user["user"] == "ferigis"
+
+    :ok = create_user("user2", "password2")
+
+    {200, users} = get(url, headers)
+
+    assert length(users) == 2
+  end
+
+  test "listing all the users stored with wrong Admin Credentials" do
+    url = @base_url <> "/user"
+    mime_type = "application/msgpack"
+    headers = [
+      {"Content-Type", mime_type},
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> "wrongpassword")}
+    ]
+
+    result = get(url, headers)
+
+    assert {401, :nobody} == result
+  end
+
   # ----------------------------------------
   # /blacklist/user Endpoint Tests
   # ----------------------------------------
@@ -625,14 +658,29 @@ defmodule Auth.APITest do
   # Internal functions
   # ----------------------------------------
 
-  defp create_user do
-    {:ok, _user} = Auth.create_user(@user, @password)
+  defp create_user(user \\ @user, password \\ @password) do
+    {:ok, _user} = Auth.create_user(user, password)
     :ok
   end
 
   defp post(data, url, headers) do
     options = [ssl: [{:versions, [:'tlsv1.2']}], recv_timeout: 500]
     {:ok, response} = HTTPoison.post(url, data, headers, options)
+
+    body = case response.body do
+      "" ->
+        :nobody
+      _ ->
+        {:ok, body} = Poison.decode(response.body)
+        body
+    end
+
+    {response.status_code, body}
+  end
+
+  defp get(url, headers) do
+    options = [ssl: [{:versions, [:'tlsv1.2']}], recv_timeout: 500]
+    {:ok, response} = HTTPoison.get(url, headers, options)
 
     body = case response.body do
       "" ->

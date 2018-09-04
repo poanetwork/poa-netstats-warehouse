@@ -92,6 +92,14 @@ defmodule POABackend.Auth do
   end
 
   @doc """
+  This function returns all the users stored in the database
+  """
+  @spec list_users() :: [User.t]
+  def list_users do
+    Repo.all(User)
+  end
+
+  @doc """
   Authenticates an Admin
   """
   @spec authenticate_admin(String.t, String.t) :: {:ok, :valid} | {:error, :notvalid}
