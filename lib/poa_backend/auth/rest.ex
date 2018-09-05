@@ -107,7 +107,6 @@ defmodule POABackend.Auth.REST do
 
   HTTP header | Values
   -- | --
-  content-type | application/json or application/msgpack
   authorization | Basic encodeBase64(adminname + “:” + password)
 
   Response
@@ -116,12 +115,11 @@ defmodule POABackend.Auth.REST do
   -- | --
   200 | Success: A list of users
   401 | Authentication failed
-  415 | Unsupported Media Type (only application/json and application/msgpack allowed)
 
   Example:
 
   ```
-  curl -i -X GET -H "Authorization: Basic YWRtaW4xOnBhc3N3b3JkMTIzNDU2Nzg=" -H "Content-Type: application/json" https://localhost:4003/user --insecure
+  curl -i -X GET -H "Authorization: Basic YWRtaW4xOnBhc3N3b3JkMTIzNDU2Nzg=" https://localhost:4003/user --insecure
 
   HTTP/1.1 200 OK
   server: Cowboy
@@ -140,6 +138,36 @@ defmodule POABackend.Auth.REST do
     "active":true, # active means it is not banned
     "created_at":"2018-09-03T16:02:25.210308"
   }
+  ```
+
+  ## Delete User Endpoint
+
+  This Endpoint is needed in order to delete a user from the system.
+
+  `DELETE /user/:username`
+
+  HTTP header | Values
+  -- | --
+  authorization | Basic encodeBase64(adminname + “:” + password)
+
+  Response
+
+  CODE | Description
+  -- | --
+  204 | Success
+  401 | Authentication failed
+  404 | The user provided doesn't exist in the system
+
+  Example:
+
+  ```
+  curl -i -X DELETE -H "Authorization: Basic YWRtaW4xOnBhc3N3b3JkMTIzNDU2Nzg=" https://localhost:4003/user/4uVIqWSf --insecure
+
+  HTTP/1.1 204 No Content
+  server: Cowboy
+  date: Tue, 04 Sep 2018 13:49:45 GMT
+  content-length: 0
+  cache-control: max-age=0, private, must-revalidate
   ```
 
   ## Blacklist Token Endpoint

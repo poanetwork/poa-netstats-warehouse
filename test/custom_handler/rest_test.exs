@@ -237,7 +237,7 @@ defmodule CustomHandler.RESTTest do
 
     original_data = :original_data
 
-    assert(original_data == REST.Plugs.Accept.init(original_data))
+    assert(original_data == REST.Plugs.ContentType.init(original_data))
     assert(original_data == REST.Plugs.Authorization.init(original_data))
     assert(original_data == REST.Plugs.RequiredFields.init(original_data))
   end

@@ -248,7 +248,7 @@ defmodule POABackend.CustomHandler.REST do
     alias POABackend.Protocol.DataType
     alias POABackend.Protocol.Message
 
-    plug REST.Plugs.Accept, ["application/json", "application/msgpack"]
+    plug REST.Plugs.ContentType, ["application/json", "application/msgpack"]
     plug Plug.Parsers, parsers: [Msgpax.PlugParser, :json], pass: ["application/msgpack", "application/json"], json_decoder: Poison
     plug REST.Plugs.RequiredFields, ~w(id)
     plug REST.Plugs.Authorization
