@@ -8,7 +8,7 @@
     <title>POABackend.Auth.REST – poa_backend v0.1.0</title>
     <link rel="stylesheet" href="dist/app-480ffdc169.css" />
     
-    <script src="dist/sidebar_items-b6949c5547.js"></script>
+    <script src="dist/sidebar_items-f62ce50de1.js"></script>
     
     
     
@@ -265,9 +265,6 @@ cache-control: max-age=0, private, must-revalidate
 </tr>
 </thead>
 <tr>
-<td style="text-align: left">content-type</td><td style="text-align: left">application/json or application/msgpack</td>
-</tr>
-<tr>
 <td style="text-align: left">authorization</td><td style="text-align: left">Basic encodeBase64(adminname + “:” + password)</td>
 </tr>
 </table>
@@ -288,12 +285,9 @@ cache-control: max-age=0, private, must-revalidate
 <tr>
 <td style="text-align: left">401</td><td style="text-align: left">Authentication failed</td>
 </tr>
-<tr>
-<td style="text-align: left">415</td><td style="text-align: left">Unsupported Media Type (only application/json and application/msgpack allowed)</td>
-</tr>
 </table>
 <p>Example:</p>
-<pre><code class="elixir">curl -i -X GET -H &quot;Authorization: Basic YWRtaW4xOnBhc3N3b3JkMTIzNDU2Nzg=&quot; -H &quot;Content-Type: application/json&quot; https://localhost:4003/user --insecure
+<pre><code class="elixir">curl -i -X GET -H &quot;Authorization: Basic YWRtaW4xOnBhc3N3b3JkMTIzNDU2Nzg=&quot; https://localhost:4003/user --insecure
 
 HTTP/1.1 200 OK
 server: Cowboy
@@ -308,6 +302,56 @@ cache-control: max-age=0, private, must-revalidate
   &quot;active&quot;:true, # active means it is not banned
   &quot;created_at&quot;:&quot;2018-09-03T16:02:25.210308&quot;
 }</code></pre>
+<h2 id="module-delete-user-endpoint" class="section-heading">
+  <a href="#module-delete-user-endpoint" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Delete User Endpoint
+</h2>
+
+<p>This Endpoint is needed in order to delete a user from the system.</p>
+<p><code class="inline">DELETE /user/:username</code></p>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left">HTTP header</th><th style="text-align: left">Values</th>
+</tr>
+</thead>
+<tr>
+<td style="text-align: left">authorization</td><td style="text-align: left">Basic encodeBase64(adminname + “:” + password)</td>
+</tr>
+</table>
+<p>Response</p>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left">CODE</th><th style="text-align: left">Description</th>
+</tr>
+</thead>
+<tr>
+<td style="text-align: left">204</td><td style="text-align: left">Success</td>
+</tr>
+<tr>
+<td style="text-align: left">401</td><td style="text-align: left">Authentication failed</td>
+</tr>
+<tr>
+<td style="text-align: left">404</td><td style="text-align: left">The user provided doesn’t exist in the system</td>
+</tr>
+</table>
+<p>Example:</p>
+<pre><code class="elixir">curl -i -X DELETE -H &quot;Authorization: Basic YWRtaW4xOnBhc3N3b3JkMTIzNDU2Nzg=&quot; https://localhost:4003/user/4uVIqWSf --insecure
+
+HTTP/1.1 204 No Content
+server: Cowboy
+date: Tue, 04 Sep 2018 13:49:45 GMT
+content-length: 0
+cache-control: max-age=0, private, must-revalidate</code></pre>
 <h2 id="module-blacklist-token-endpoint" class="section-heading">
   <a href="#module-blacklist-token-endpoint" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
   Blacklist Token Endpoint
