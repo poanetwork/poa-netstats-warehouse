@@ -9,7 +9,7 @@ defmodule POABackend.Auth.Router do
 
   @token_default_ttl {1, :hour}
 
-  plug REST.Plugs.Accept, ["application/json", "application/msgpack"]
+  plug REST.Plugs.ContentType, ["application/json", "application/msgpack"]
   plug Plug.Parsers, parsers: [Msgpax.PlugParser, :json], pass: ["application/msgpack", "application/json"], json_decoder: Poison
   plug :match
   plug :dispatch
@@ -81,6 +81,24 @@ defmodule POABackend.Auth.Router do
           |> Poison.encode!
 
         send_resp(conn, 200, result)
+    else
+      _error ->
+        conn
+          |> send_resp(401, "")
+          |> halt
+    end
+  end
+
+  delete "/user/:user_name" do
+    with {"authorization", "Basic " <> base64} <- List.keyfind(conn.req_headers, "authorization", 0),
+         {:ok, decoded64} <- Base.decode64(base64),
+         [admin_name, admin_password] <- String.split(decoded64, ":"),
+         {:ok, :valid} <- Auth.authenticate_admin(admin_name, admin_password)
+    do
+        case Auth.delete_user(user_name) do
+          {:ok, :deleted} -> send_resp(conn, 204, "")
+          {:error, :notfound} -> send_resp(conn, 404, "")
+        end
     else
       _error ->
         conn

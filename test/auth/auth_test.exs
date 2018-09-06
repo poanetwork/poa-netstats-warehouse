@@ -108,6 +108,22 @@ defmodule Auth.AuthTest do
     assert Enum.member?(users, user2)
   end
 
+  test "delete user" do
+    user_name = "ferigis"
+    password = "mypassword"
+
+    {:ok, user} = Auth.create_user(user_name, password)
+
+    assert [user] == Auth.list_users()
+
+    assert {:error, :notfound} == Auth.delete_user("thisuserdoesntexist")
+
+    assert [user] == Auth.list_users()
+
+    assert {:ok, :deleted} == Auth.delete_user(user_name)
+    assert [] == Auth.list_users()
+  end
+
   # ----------------------------------------
   # Token Tests
   # ----------------------------------------

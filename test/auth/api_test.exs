@@ -319,9 +319,7 @@ defmodule Auth.APITest do
 
   test "listing all the users stored" do
     url = @base_url <> "/user"
-    mime_type = "application/msgpack"
     headers = [
-      {"Content-Type", mime_type},
       {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> @admin_pwd)}
     ]
 
@@ -339,15 +337,54 @@ defmodule Auth.APITest do
 
   test "listing all the users stored with wrong Admin Credentials" do
     url = @base_url <> "/user"
-    mime_type = "application/msgpack"
     headers = [
-      {"Content-Type", mime_type},
       {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> "wrongpassword")}
     ]
 
     result = get(url, headers)
 
     assert {401, :nobody} == result
+  end
+
+  test "deleting a user which exists in the system" do
+    url = @base_url <> "/user"
+    headers = [
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> @admin_pwd)}
+    ]
+
+    {200, [initial_user] = users} = get(url, headers)
+
+    assert length(users) == 1 # ferigis user is created at the begining of each test
+    assert initial_user["user"] == "ferigis"
+
+    assert {204, :nobody} == delete(url <> "/ferigis", headers)
+
+    assert {200, []} == get(url, headers)
+  end
+
+  test "deleting a user which doern't exist in the system" do
+    url = @base_url <> "/user"
+    headers = [
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> @admin_pwd)}
+    ]
+
+    {200, [initial_user] = users} = get(url, headers)
+
+    assert length(users) == 1 # ferigis user is created at the begining of each test
+    assert initial_user["user"] == "ferigis"
+
+    assert {404, :nobody} == delete(url <> "/noexist", headers)
+
+    {200, ^users} = get(url, headers)
+  end
+
+  test "deleting a user with wrong admin credentials" do
+    url = @base_url <> "/user"
+    headers = [
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> "wrongpassword")}
+    ]
+
+    assert {401, :nobody} == delete(url <> "/ferigis", headers)
   end
 
   # ----------------------------------------
@@ -681,6 +718,21 @@ defmodule Auth.APITest do
   defp get(url, headers) do
     options = [ssl: [{:versions, [:'tlsv1.2']}], recv_timeout: 500]
     {:ok, response} = HTTPoison.get(url, headers, options)
+
+    body = case response.body do
+      "" ->
+        :nobody
+      _ ->
+        {:ok, body} = Poison.decode(response.body)
+        body
+    end
+
+    {response.status_code, body}
+  end
+
+  defp delete(url, headers) do
+    options = [ssl: [{:versions, [:'tlsv1.2']}], recv_timeout: 500]
+    {:ok, response} = HTTPoison.delete(url, headers, options)
 
     body = case response.body do
       "" ->

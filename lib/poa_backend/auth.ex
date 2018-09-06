@@ -100,6 +100,20 @@ defmodule POABackend.Auth do
   end
 
   @doc """
+  This function deletes the user associated with the user name passed as a parameter
+  """
+  @spec delete_user(String.t) :: {:ok, :deleted} | {:error, :notfound}
+  def delete_user(user_name) do
+    case get_user(user_name) do
+      nil ->
+        {:error, :notfound}
+      user ->
+        Repo.delete!(user)
+        {:ok, :deleted}
+    end
+  end
+
+  @doc """
   Authenticates an Admin
   """
   @spec authenticate_admin(String.t, String.t) :: {:ok, :valid} | {:error, :notvalid}

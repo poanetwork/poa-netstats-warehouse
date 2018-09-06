@@ -8,7 +8,7 @@
     <title>POABackend.Auth – poa_backend v0.1.0</title>
     <link rel="stylesheet" href="dist/app-480ffdc169.css" />
     
-    <script src="dist/sidebar_items-b6949c5547.js"></script>
+    <script src="dist/sidebar_items-f62ce50de1.js"></script>
     
     
     
@@ -164,6 +164,15 @@ expiration time as Integer</p>
   </div>
   
     <div class="summary-synopsis"><p>This function Deactivates a user, storing <code class="inline">active: false</code> in the database for the given user</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_user/1">delete_user(user_name)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>This function deletes the user associated with the user name passed as a parameter</p>
 </div>
   
 </div>
@@ -327,7 +336,7 @@ with that name in the database already</p>
     </a>
     <span class="signature">authenticate_admin(admin_name, password)</span>
     
-      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/auth.ex#L106" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/auth.ex#L120" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
@@ -387,7 +396,7 @@ with that name in the database already</p>
     </a>
     <span class="signature">create_banned_token(jwt_token)</span>
     
-      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/auth.ex#L166" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/auth.ex#L180" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
@@ -418,7 +427,7 @@ This function will extract the expiration time from the claims and store them in
     </a>
     <span class="signature">create_banned_token(token, expires)</span>
     
-      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/auth.ex#L180" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/auth.ex#L194" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
@@ -503,6 +512,35 @@ expiration time as Integer.</p>
 
   </section>
 </div>
+<div class="detail" id="delete_user/1">
+  
+  
+  <div class="detail-header">
+    <a href="#delete_user/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <span class="signature">delete_user(user_name)</span>
+    
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/auth.ex#L106" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>delete_user(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: {:ok, :deleted} | {:error, :notfound}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>This function deletes the user associated with the user name passed as a parameter</p>
+
+  </section>
+</div>
 <div class="detail" id="generate_password/0">
   
   
@@ -513,7 +551,7 @@ expiration time as Integer.</p>
     </a>
     <span class="signature">generate_password()</span>
     
-      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/auth.ex#L141" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/auth.ex#L155" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
@@ -542,7 +580,7 @@ expiration time as Integer.</p>
     </a>
     <span class="signature">generate_user_name()</span>
     
-      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/auth.ex#L120" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/auth.ex#L134" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
@@ -571,7 +609,7 @@ expiration time as Integer.</p>
     </a>
     <span class="signature">generate_user_name(user_name)</span>
     
-      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/auth.ex#L130" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/auth.ex#L144" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
@@ -658,7 +696,7 @@ expiration time as Integer.</p>
     </a>
     <span class="signature">purge_banned_tokens()</span>
     
-      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/auth.ex#L212" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/auth.ex#L226" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
@@ -716,7 +754,7 @@ expiration time as Integer.</p>
     </a>
     <span class="signature">token_banned?(token)</span>
     
-      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/auth.ex#L229" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/auth.ex#L243" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
@@ -774,7 +812,7 @@ expiration time as Integer.</p>
     </a>
     <span class="signature">valid_token?(jwt_token)</span>
     
-      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/auth.ex#L194" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/auth.ex#L208" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
@@ -803,7 +841,7 @@ expiration time as Integer.</p>
     </a>
     <span class="signature">valid_user_name?(user_name)</span>
     
-      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/auth.ex#L150" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/auth.ex#L164" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
