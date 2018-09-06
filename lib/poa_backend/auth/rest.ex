@@ -57,7 +57,7 @@ defmodule POABackend.Auth.REST do
   {"token":"eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJwb2FfYmFja2VuZCIsImV4cCI6MTUzMzkzNjMwNiwiaWF0IjoxNTMzOTMyNzA2LCJpc3MiOiJwb2FfYmFja2VuZCIsImp0aSI6ImI0MzBkNTMwLWExZDYtNDk1Yy1hMjYyLThjNTcxMmM1OTM4YSIsIm5iZiI6MTUzMzkzMjcwNSwic3ViIjoiUmp1YURzdi0iLCJ0eXAiOiJhY2Nlc3MifQ.E3gqpCxY5wAAhZwcr7vZVLcC7X-bSHcXfX6NgeJc-LMbpcDgJvZgcgYQ-VTIkulb2mWw_Fjc7sXVwYMeIIliMg"}
   ```
 
-  ## User Endpoint
+  ## Create User Endpoint
 
   This Endpoint is needed in order to add a new user. Only Admin people can do that.
 
@@ -166,6 +166,45 @@ defmodule POABackend.Auth.REST do
   HTTP/1.1 204 No Content
   server: Cowboy
   date: Tue, 04 Sep 2018 13:49:45 GMT
+  content-length: 0
+  cache-control: max-age=0, private, must-revalidate
+  ```
+
+  ## Update User Endpoint
+
+  This Endpoint is needed in order to update a user. Currently only the `active` property can be updated. If a user is set to `active: false` means
+  it was banned. We can use this enpoint in order to ban or unban users too.
+
+  `PATCH /user/:username`
+
+  HTTP header | Values
+  -- | --
+  content-type | application/json or application/msgpack
+  authorization | Basic encodeBase64(adminname + “:” + password)
+
+  Payload | Value
+  -- | --
+  JSON | {"active" : boolean()}
+  MessagePack | Same as JSON but packed with MessagePack
+
+  Response
+
+  CODE | Description
+  -- | --
+  204 | Success
+  401 | Authentication failed
+  404 | The user doesn't exist
+  415 | Unsupported Media Type (only application/json and application/msgpack allowed)
+  422 | Unprocessable entity (the active value is not a boolean)
+
+  Example:
+
+  ```
+  curl -i -X PATCH -H "Authorization: Basic YWRtaW4xOnBhc3N3b3JkMTIzNDU2Nzg=" -H "Content-Type: application/json" -d '{"active":false}' https://localhost:4003/user/cZFxFfNT --insecure
+
+  HTTP/1.1 204 No Content
+  server: Cowboy
+  date: Wed, 05 Sep 2018 13:38:32 GMT
   content-length: 0
   cache-control: max-age=0, private, must-revalidate
   ```
