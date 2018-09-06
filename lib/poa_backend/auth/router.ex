@@ -107,6 +107,31 @@ defmodule POABackend.Auth.Router do
     end
   end
 
+  patch "/user/:user_name" do
+    with {"authorization", "Basic " <> base64} <- List.keyfind(conn.req_headers, "authorization", 0),
+         {:ok, decoded64} <- Base.decode64(base64),
+         [admin_name, admin_password] <- String.split(decoded64, ":"),
+         {:ok, :valid} <- Auth.authenticate_admin(admin_name, admin_password),
+         true <- is_boolean(conn.params["active"])
+    do
+        case Auth.get_user(user_name) do
+          nil -> send_resp(conn, 404, "")
+          user -> 
+            set_active_user(user, conn.params["active"])
+            send_resp(conn, 204, "")
+        end
+    else
+      false ->
+        conn
+          |> send_resp(422, "")
+          |> halt
+      _error ->
+        conn
+          |> send_resp(401, "")
+          |> halt
+    end
+  end
+
   post "/blacklist/user" do
     with {"authorization", "Basic " <> base64} <- List.keyfind(conn.req_headers, "authorization", 0),
          {:ok, decoded64} <- Base.decode64(base64),
@@ -161,6 +186,15 @@ defmodule POABackend.Auth.Router do
 
   match _ do
     send_resp(conn, 404, "")
+  end
+
+  defp set_active_user(user, true) do
+    Auth.activate_user(user)
+    :ok
+  end
+  defp set_active_user(user, false) do
+    Auth.deactivate_user(user)
+    :ok
   end
 
 end

@@ -387,6 +387,198 @@ defmodule Auth.APITest do
     assert {401, :nobody} == delete(url <> "/ferigis", headers)
   end
 
+  test "updating user [JSON]" do
+    url = @base_url <> "/user"
+    mime_type = "application/json"
+    headers = [
+      {"Content-Type", mime_type},
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> @admin_pwd)}
+    ]
+
+    {200, [initial_user]} = get(url, headers)
+
+    assert initial_user["active"]
+
+    result =
+      %{}
+      |> Map.put(:active, false)
+      |> Poison.encode!
+      |> patch(url <> "/ferigis", headers)
+    
+    assert {204, :nobody} == result
+
+    {200, [initial_user]} = get(url, headers)
+
+    refute initial_user["active"]
+
+    result =
+      %{}
+      |> Map.put(:active, true)
+      |> Poison.encode!
+      |> patch(url <> "/ferigis", headers)
+    
+    assert {204, :nobody} == result
+
+    {200, [initial_user]} = get(url, headers)
+
+    assert initial_user["active"]
+  end
+
+  test "updating user [MSGPACK]" do
+    url = @base_url <> "/user"
+    mime_type = "application/msgpack"
+    headers = [
+      {"Content-Type", mime_type},
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> @admin_pwd)}
+    ]
+
+    {200, [initial_user]} = get(url, headers)
+
+    assert initial_user["active"]
+
+    result =
+      %{}
+      |> Map.put(:active, false)
+      |> Msgpax.pack!
+      |> patch(url <> "/ferigis", headers)
+    
+    assert {204, :nobody} == result
+
+    {200, [initial_user]} = get(url, headers)
+
+    refute initial_user["active"]
+
+    result =
+      %{}
+      |> Map.put(:active, true)
+      |> Msgpax.pack!
+      |> patch(url <> "/ferigis", headers)
+    
+    assert {204, :nobody} == result
+
+    {200, [initial_user]} = get(url, headers)
+
+    assert initial_user["active"]
+  end
+
+  test "updating user with wrong active value (not boolean) [JSON]" do
+    url = @base_url <> "/user"
+    mime_type = "application/json"
+    headers = [
+      {"Content-Type", mime_type},
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> @admin_pwd)}
+    ]
+
+    {200, [initial_user]} = get(url, headers)
+
+    assert initial_user["active"]
+
+    result =
+      %{}
+      |> Map.put(:active, "wrong value")
+      |> Poison.encode!
+      |> patch(url <> "/ferigis", headers)
+    
+    assert {422, :nobody} == result
+
+    {200, [initial_user]} = get(url, headers)
+
+    assert initial_user["active"]
+  end
+
+  test "updating user with wrong active value (not boolean) [MSGPACK]" do
+    url = @base_url <> "/user"
+    mime_type = "application/msgpack"
+    headers = [
+      {"Content-Type", mime_type},
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> @admin_pwd)}
+    ]
+
+    {200, [initial_user]} = get(url, headers)
+
+    assert initial_user["active"]
+
+    result =
+      %{}
+      |> Map.put(:active, "wrong value")
+      |> Msgpax.pack!
+      |> patch(url <> "/ferigis", headers)
+    
+    assert {422, :nobody} == result
+
+    {200, [initial_user]} = get(url, headers)
+
+    assert initial_user["active"]
+  end
+
+  test "updating user with wrong admin credentials [JSON]" do
+    url = @base_url <> "/user"
+    mime_type = "application/json"
+    headers = [
+      {"Content-Type", mime_type},
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> "wrongpassword")}
+    ]
+
+    result =
+      %{}
+      |> Map.put(:active, false)
+      |> Poison.encode!
+      |> patch(url <> "/ferigis", headers)
+    
+    assert {401, :nobody} == result
+  end
+
+  test "updating user with wrong admin credentials [MSGPACK]" do
+    url = @base_url <> "/user"
+    mime_type = "application/msgpack"
+    headers = [
+      {"Content-Type", mime_type},
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> "wrongpassword")}
+    ]
+
+    result =
+      %{}
+      |> Map.put(:active, false)
+      |> Msgpax.pack!
+      |> patch(url <> "/ferigis", headers)
+    
+    assert {401, :nobody} == result
+  end
+
+  test "updating user who doesn't exist [JSON]" do
+    url = @base_url <> "/user"
+    mime_type = "application/json"
+    headers = [
+      {"Content-Type", mime_type},
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> @admin_pwd)}
+    ]
+
+    result =
+      %{}
+      |> Map.put(:active, true)
+      |> Poison.encode!
+      |> patch(url <> "/unnexistinguser", headers)
+    
+    assert {404, :nobody} == result
+  end
+
+  test "updating user who doesn't exist [MSGPACK]" do
+    url = @base_url <> "/user"
+    mime_type = "application/msgpack"
+    headers = [
+      {"Content-Type", mime_type},
+      {"authorization", "Basic " <> Base.encode64(@admin <> ":" <> @admin_pwd)}
+    ]
+
+    result =
+      %{}
+      |> Map.put(:active, true)
+      |> Msgpax.pack!
+      |> patch(url <> "/unnexistinguser", headers)
+    
+    assert {404, :nobody} == result
+  end
+
   # ----------------------------------------
   # /blacklist/user Endpoint Tests
   # ----------------------------------------
@@ -745,4 +937,18 @@ defmodule Auth.APITest do
     {response.status_code, body}
   end
 
+  defp patch(data, url, headers) do
+    options = [ssl: [{:versions, [:'tlsv1.2']}], recv_timeout: 500]
+    {:ok, response} = HTTPoison.patch(url, data, headers, options)
+
+    body = case response.body do
+      "" ->
+        :nobody
+      _ ->
+        {:ok, body} = Poison.decode(response.body)
+        body
+    end
+
+    {response.status_code, body}
+  end
 end

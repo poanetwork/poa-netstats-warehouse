@@ -9,7 +9,7 @@ defmodule POABackend.CustomHandler.REST.Plugs.ContentType do
     accepted_content_type
   end
 
-  def call(%Conn{method: method} = conn, accepted_content_type) when method in ["POST", "PUT"] do
+  def call(%Conn{method: method} = conn, accepted_content_type) when method in ["POST", "PUT", "PATCH"] do
     import Plug.Conn
   
     with {"content-type", content_type} <- List.keyfind(conn.req_headers, "content-type", 0),
