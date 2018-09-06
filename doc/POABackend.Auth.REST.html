@@ -170,9 +170,9 @@ content-length: 362
 cache-control: max-age=0, private, must-revalidate
 
 {&quot;token&quot;:&quot;eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJwb2FfYmFja2VuZCIsImV4cCI6MTUzMzkzNjMwNiwiaWF0IjoxNTMzOTMyNzA2LCJpc3MiOiJwb2FfYmFja2VuZCIsImp0aSI6ImI0MzBkNTMwLWExZDYtNDk1Yy1hMjYyLThjNTcxMmM1OTM4YSIsIm5iZiI6MTUzMzkzMjcwNSwic3ViIjoiUmp1YURzdi0iLCJ0eXAiOiJhY2Nlc3MifQ.E3gqpCxY5wAAhZwcr7vZVLcC7X-bSHcXfX6NgeJc-LMbpcDgJvZgcgYQ-VTIkulb2mWw_Fjc7sXVwYMeIIliMg&quot;}</code></pre>
-<h2 id="module-user-endpoint" class="section-heading">
-  <a href="#module-user-endpoint" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
-  User Endpoint
+<h2 id="module-create-user-endpoint" class="section-heading">
+  <a href="#module-create-user-endpoint" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Create User Endpoint
 </h2>
 
 <p>This Endpoint is needed in order to add a new user. Only Admin people can do that.</p>
@@ -350,6 +350,83 @@ cache-control: max-age=0, private, must-revalidate
 HTTP/1.1 204 No Content
 server: Cowboy
 date: Tue, 04 Sep 2018 13:49:45 GMT
+content-length: 0
+cache-control: max-age=0, private, must-revalidate</code></pre>
+<h2 id="module-update-user-endpoint" class="section-heading">
+  <a href="#module-update-user-endpoint" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Update User Endpoint
+</h2>
+
+<p>This Endpoint is needed in order to update a user. Currently only the <code class="inline">active</code> property can be updated. If a user is set to <code class="inline">active: false</code> means
+it was banned. We can use this enpoint in order to ban or unban users too.</p>
+<p><code class="inline">PATCH /user/:username</code></p>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left">HTTP header</th><th style="text-align: left">Values</th>
+</tr>
+</thead>
+<tr>
+<td style="text-align: left">content-type</td><td style="text-align: left">application/json or application/msgpack</td>
+</tr>
+<tr>
+<td style="text-align: left">authorization</td><td style="text-align: left">Basic encodeBase64(adminname + “:” + password)</td>
+</tr>
+</table>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left">Payload</th><th style="text-align: left">Value</th>
+</tr>
+</thead>
+<tr>
+<td style="text-align: left">JSON</td><td style="text-align: left">{“active” : boolean()}</td>
+</tr>
+<tr>
+<td style="text-align: left">MessagePack</td><td style="text-align: left">Same as JSON but packed with MessagePack</td>
+</tr>
+</table>
+<p>Response</p>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left">CODE</th><th style="text-align: left">Description</th>
+</tr>
+</thead>
+<tr>
+<td style="text-align: left">204</td><td style="text-align: left">Success</td>
+</tr>
+<tr>
+<td style="text-align: left">401</td><td style="text-align: left">Authentication failed</td>
+</tr>
+<tr>
+<td style="text-align: left">404</td><td style="text-align: left">The user doesn’t exist</td>
+</tr>
+<tr>
+<td style="text-align: left">415</td><td style="text-align: left">Unsupported Media Type (only application/json and application/msgpack allowed)</td>
+</tr>
+<tr>
+<td style="text-align: left">422</td><td style="text-align: left">Unprocessable entity (the active value is not a boolean)</td>
+</tr>
+</table>
+<p>Example:</p>
+<pre><code class="elixir">curl -i -X PATCH -H &quot;Authorization: Basic YWRtaW4xOnBhc3N3b3JkMTIzNDU2Nzg=&quot; -H &quot;Content-Type: application/json&quot; -d &#39;{&quot;active&quot;:false}&#39; https://localhost:4003/user/cZFxFfNT --insecure
+
+HTTP/1.1 204 No Content
+server: Cowboy
+date: Wed, 05 Sep 2018 13:38:32 GMT
 content-length: 0
 cache-control: max-age=0, private, must-revalidate</code></pre>
 <h2 id="module-blacklist-token-endpoint" class="section-heading">
