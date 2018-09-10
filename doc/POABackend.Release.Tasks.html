@@ -5,7 +5,7 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.18.4">
-    <title>POABackend.Protocol.MessageType – poa_backend v0.1.0</title>
+    <title>POABackend.Release.Tasks – poa_backend v0.1.0</title>
     <link rel="stylesheet" href="dist/app-480ffdc169.css" />
     
     <script src="dist/sidebar_items-3a7a458c10.js"></script>
@@ -70,9 +70,9 @@
 
       <h1>
         <small class="visible-xs">poa_backend v0.1.0</small>
-        POABackend.Protocol.MessageType
+        POABackend.Release.Tasks
         
-          <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/protocol/message_type.ex#L1" title="View Source" class="view-source" rel="help">
+          <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/release/tasks.ex#L1" title="View Source" class="view-source" rel="help">
             <span class="icon-code" aria-hidden="true"></span>
             <span class="sr-only">View Source</span>
           </a>
@@ -81,15 +81,8 @@
 
       
         <section id="moduledoc">
-          <p>Regarding the POA Protocol only 2 types of message can be processed in the backend.</p>
-<p>Those message types are</p>
-<ul>
-<li><code class="inline">data</code> - When data is sent to the backend. Data is also called “metric data”
-</li>
-<li><code class="inline">bye</code> - When the client wants to stop the communication
-</li>
-</ul>
-<p><strong>NOTE</strong> New message types can be added in future while the protocol is extended</p>
+          <p>This module is needed when we create a release. We are using Mnesia locally so when we start create a release
+we have to create the Mnesia files there. In order to do that we have to run this <a href="#migrate/0"><code class="inline">migrate/0</code></a> function.</p>
 
         </section>
       
@@ -104,24 +97,21 @@
             Summary
           </h1>
           
-  <div class="summary-types summary">
+
+          
+  <div class="summary-functions summary">
     <h2>
-      <a href="#types">Types</a>
+      <a href="#functions">Functions</a>
     </h2>
     <div class="summary-row">
   <div class="summary-signature">
-    <a href="#t:t/0">t()</a>
+    <a href="#migrate/0">migrate()</a>
   </div>
-  
-    <div class="summary-synopsis"><p>The message type. Only <code class="inline">data</code> and <code class="inline">bye</code> are allowed</p>
-</div>
   
 </div>
 
   </div>
 
-
-          
 
           
 
@@ -129,49 +119,40 @@
       
 
       
-        <section id="types" class="details-list">
+
+      
+        <section id="functions" class="details-list">
           <h1 class="section-heading">
-            <a class="hover-link" href="#types">
+            <a class="hover-link" href="#functions">
               <span class="icon-link" aria-hidden="true"></span>
               <span class="sr-only">Link to this section</span>
             </a>
-            Types
+            Functions
           </h1>
-          <div class="types-list">
-            <div class="detail" id="t:t/0">
+          <div class="detail" id="migrate/0">
   
   
   <div class="detail-header">
-    <a href="#t:t/0" class="detail-link" title="Link to this type">
+    <a href="#migrate/0" class="detail-link" title="Link to this function">
       <span class="icon-link" aria-hidden="true"></span>
-      <span class="sr-only">Link to this type</span>
+      <span class="sr-only">Link to this function</span>
     </a>
-    <span class="signature">t()</span>
+    <span class="signature">migrate()</span>
     
-      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/protocol/message_type.ex#L18" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/poanetwork/poa-netstats-wharehouse/blob/v0.1.0/lib/poa_backend/release/tasks.ex#L17" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
     
     
     
-      <div class="specs">
-        
-          <pre>t() :: :data | :bye</pre>
-        
-      </div>
-    
   </div>
   <section class="docstring">
-    <p>The message type. Only <code class="inline">data</code> and <code class="inline">bye</code> are allowed</p>
-
+    
   </section>
 </div>
 
-          </div>
         </section>
-      
-
       
 
       
